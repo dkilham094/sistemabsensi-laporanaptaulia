@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sistem Absensi – Apotek Aulia</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh}
+
+    .navbar{
+      background:linear-gradient(135deg,#1a73e8,#0d47a1);
+      color:white;padding:14px 20px;
+      display:flex;justify-content:space-between;align-items:center;
+      box-shadow:0 2px 10px rgba(0,0,0,0.25);
+    }
+    .navbar-brand{display:flex;align-items:center;gap:10px}
+    .navbar-brand .logo-icon{font-size:1.6rem}
+    .navbar-brand h1{font-size:1rem;line-height:1.2;font-weight:700}
+    .navbar-brand p{font-size:0.72rem;opacity:0.8}
+    .nav-links{display:flex;gap:6px;flex-wrap:wrap}
+    .nav-links button{
+      background:rgba(255,255,255,0.15);color:white;
+      border:1px solid rgba(255,255,255,0.3);
+      padding:6px 13px;border-radius:6px;cursor:pointer;
+      font-size:0.82rem;transition:background 0.2s
+    }
+    .nav-links button:hover{background:rgba(255,255,255,0.3)}
+    .nav-links button.active{background:white;color:#1a73e8;font-weight:700}
+
+    .container{max-width:960px;margin:22px auto;padding:0 14px}
+
+    .card{
+      background:white;border-radius:14px;
+      padding:22px;box-shadow:0 2px 14px rgba(0,0,0,0.08);
+      margin-bottom:18px
+    }
+    .card h2{
+      font-size:0.97rem;color:#222;
+      margin-bottom:14px;padding-bottom:10px;
+      border-bottom:2px solid #e8f0fe;
+      display:flex;align-items:center;gap:7px
+    }
+
+    .form-group{margin-bottom:13px}
+    label{display:block;font-size:0.82rem;color:#555;margin-bottom:5px;font-weight:600}
+    input,select,textarea{
+      width:100%;padding:9px 13px;
+      border:1.5px solid #ddd;border-radius:8px;
+      font-size:0.92rem;transition:border 0.2s;outline:none;font-family:inherit
+    }
+    input:focus,select:focus{border-color:#1a73e8}
+    input[readonly],input:disabled{background:#f5f5f5;color:#666}
+
+    .btn{
+      width:100%;padding:11px;border:none;border-radius:8px;
+      font-size:0.97rem;font-weight:700;cursor:pointer;
+      transition:transform 0.1s,opacity 0.2s
+    }
+    .btn:active{transform:scale(0.98)}
+    .btn:disabled{opacity:0.42;cursor:not-allowed}
+    .btn-primary{background:#1a73e8;color:white}
+    .btn-success{background:#34a853;color:white}
+    .btn-danger{background:#ea4335;color:white}
+    .btn-warn{background:#f9ab00;color:white}
+    .btn-outline{
+      background:white;border:1.5px solid #1a73e8;color:#1a73e8;
+      padding:7px 15px;border-radius:6px;cursor:pointer;font-size:0.83rem
+    }
+    .btn-sm{padding:7px 13px;font-size:0.8rem;width:auto;background:#1a73e8;color:white;border-radius:6px;border:none;cursor:pointer}
+    .btn-sm-success{padding:7px 13px;font-size:0.8rem;width:auto;background:#34a853;color:white;border-radius:6px;border:none;cursor:pointer}
+    .btn-sm-danger{padding:7px 13px;font-size:0.8rem;width:auto;background:#ea4335;color:white;border-radius:6px;border:none;cursor:pointer}
+    .btn-sm-warn{padding:7px 13px;font-size:0.8rem;width:auto;background:#f9ab00;color:white;border-radius:6px;border:none;cursor:pointer}
+
+    .gps-status{
+      display:flex;align-items:center;gap:10px;
+      padding:11px 15px;border-radius:8px;
+      font-size:0.88rem;margin-bottom:14px
+    }
+    .gps-status.checking{background:#fff8e1;color:#f57c00;border:1px solid #ffe082}
+    .gps-status.allowed{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+    .gps-status.denied{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+    .gps-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+    .checking .gps-dot{background:#f57c00;animation:pulse 1s infinite}
+    .allowed  .gps-dot{background:#2e7d32}
+    .denied   .gps-dot{background:#c62828}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+    .camera-wrap{
+      position:relative;width:100%;max-width:320px;
+      margin:0 auto 14px;border-radius:14px;overflow:hidden;
+      background:#111;aspect-ratio:3/4;
+      box-shadow:0 4px 20px rgba(0,0,0,0.3)
+    }
+    #video-preview{
+      width:100%;height:100%;object-fit:cover;
+      transform:scaleX(-1);display:block
+    }
+    #canvas-snap{display:none}
+    .camera-overlay{
+      position:absolute;inset:0;
+      display:flex;flex-direction:column;
+      justify-content:flex-end;align-items:center;
+      padding-bottom:16px;
+      background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 55%)
+    }
+    .face-guide{
+      position:absolute;top:50%;left:50%;
+      transform:translate(-50%,-60%);
+      width:130px;height:160px;
+      border:3px solid rgba(255,255,255,0.6);
+      border-radius:50%;pointer-events:none
+    }
+    .capture-btn{
+      width:64px;height:64px;border-radius:50%;
+      background:white;border:4px solid rgba(255,255,255,0.45);
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:1.7rem;transition:transform 0.15s;
+      box-shadow:0 2px 12px rgba(0,0,0,0.35)
+    }
+    .capture-btn:hover{transform:scale(1.08)}
+    .capture-btn:disabled{opacity:0.38;cursor:not-allowed}
+    .selfie-result{
+      width:100%;max-width:320px;margin:0 auto 12px;
+      border-radius:14px;overflow:hidden;position:relative;
+      box-shadow:0 4px 18px rgba(0,0,0,0.2)
+    }
+    .selfie-result img{width:100%;display:block;transform:scaleX(-1)}
+    .selfie-stamp{
+      position:absolute;bottom:0;left:0;right:0;
+      background:rgba(0,0,0,0.58);color:white;
+      font-size:0.7rem;padding:7px 10px;
+      display:flex;flex-direction:column;gap:2px
+    }
+    .retake-btn{
+      display:block;width:100%;max-width:320px;margin:0 auto 10px;
+      padding:9px;background:rgba(234,67,53,0.08);color:#ea4335;
+      border:1.5px solid #ea4335;border-radius:8px;
+      font-size:0.87rem;font-weight:600;cursor:pointer
+    }
+
+    .badge{padding:3px 10px;border-radius:20px;font-size:0.74rem;font-weight:600;white-space:nowrap}
+    .badge-masuk{background:#e3f2fd;color:#1565c0}
+    .badge-pulang{background:#e8f5e9;color:#2e7d32}
+    .badge-terlambat{background:#fff3e0;color:#e65100}
+    .badge-locked{background:#fce4ec;color:#c62828}
+    .badge-done{background:#e8f5e9;color:#2e7d32}
+    .badge-pending{background:#fff8e1;color:#f57c00}
+
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:0.83rem}
+    thead tr{background:#e8f0fe}
+    th{padding:9px 11px;text-align:left;color:#1a73e8;font-weight:700;white-space:nowrap}
+    td{padding:8px 11px;border-bottom:1px solid #f0f0f0;color:#333;white-space:nowrap}
+    tr:hover td{background:#f8faff}
+    .foto-thumb{
+      width:40px;height:40px;border-radius:7px;object-fit:cover;
+      cursor:pointer;border:2px solid #e8f0fe;
+      transition:transform 0.2s;transform:scaleX(-1)
+    }
+    .foto-thumb:hover{transform:scaleX(-1) scale(1.18)}
+
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+    .stat-card{background:white;border-radius:10px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+    .stat-card .val{font-size:1.45rem;font-weight:700;color:#1a73e8}
+    .stat-card .lbl{font-size:0.75rem;color:#777;margin-top:3px}
+
+    .alert{padding:11px 15px;border-radius:8px;font-size:0.87rem;margin-bottom:12px}
+    .alert-info{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+    .alert-success{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+    .alert-warn{background:#fff8e1;color:#e65100;border:1px solid #ffcc02}
+    .alert-danger{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+
+    .omset-card{border:2px solid #e8f0fe;border-radius:10px;padding:16px;margin-top:12px;background:#f8fbff}
+    .omset-card.submitted{border-color:#c8e6c9;background:#f1f8e9}
+    .lock-info{
+      display:flex;align-items:center;gap:8px;
+      background:#ffebee;border:1px solid #ffcdd2;
+      color:#c62828;padding:9px 13px;border-radius:8px;font-size:0.84rem;margin-top:9px
+    }
+    .lock-info.ok{background:#e8f5e9;border-color:#a5d6a7;color:#2e7d32}
+
+    .tab-btns{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+    .tab-btn{padding:6px 16px;border-radius:20px;border:1.5px solid #ddd;background:white;color:#555;cursor:pointer;font-size:0.82rem;transition:all 0.2s}
+    .tab-btn.active{background:#1a73e8;color:white;border-color:#1a73e8}
+
+    .filter-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+    .filter-row .fg{flex:1;min-width:130px}
+    .filter-row label{font-size:0.79rem;color:#555;font-weight:600;margin-bottom:4px;display:block}
+    .filter-row input,.filter-row select{width:100%}
+
+    #login-page{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%)
+    }
+    .login-card{
+      background:white;border-radius:18px;padding:36px 30px;
+      width:100%;max-width:390px;box-shadow:0 10px 40px rgba(0,0,0,0.25)
+    }
+    .login-logo{text-align:center;margin-bottom:24px}
+    .login-logo .pill{
+      display:inline-block;background:#e8f0fe;
+      color:#1a73e8;font-size:0.72rem;font-weight:700;
+      letter-spacing:1px;padding:3px 12px;border-radius:20px;
+      margin-bottom:8px;text-transform:uppercase
+    }
+    .login-logo .icon{font-size:3rem;display:block;margin-bottom:4px}
+    .login-logo h2{color:#1a1a1a;font-size:1.35rem;font-weight:800;letter-spacing:-0.5px}
+    .login-logo .apotek-name{color:#1a73e8;font-size:1rem;font-weight:700;margin-top:2px}
+    .login-logo .sub{color:#999;font-size:0.76rem;margin-top:4px}
+
+    .modal-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,0.52);
+      display:flex;align-items:center;justify-content:center;
+      z-index:9999;padding:14px
+    }
+    .modal{
+      background:white;border-radius:14px;padding:26px;
+      width:100%;max-width:440px;box-shadow:0 8px 32px rgba(0,0,0,0.22)
+    }
+    .modal h3{font-size:1rem;margin-bottom:14px;color:#333}
+    .modal-btns{display:flex;gap:9px;margin-top:16px}
+    .modal-btns button{flex:1}
+
+    .lightbox{
+      position:fixed;inset:0;background:rgba(0,0,0,0.9);
+      display:flex;align-items:center;justify-content:center;
+      z-index:99999;cursor:pointer;padding:16px;flex-direction:column;gap:12px
+    }
+    .lightbox img{
+      max-width:min(380px,88vw);max-height:80vh;
+      border-radius:14px;transform:scaleX(-1);
+      box-shadow:0 8px 40px rgba(0,0,0,0.5)
+    }
+    .lightbox-info{color:rgba(255,255,255,0.75);font-size:0.8rem;text-align:center}
+
+    .step-indicator{display:flex;gap:6px;margin-bottom:16px}
+    .step{flex:1;height:4px;border-radius:2px;background:#e0e0e0;transition:background 0.3s}
+    .step.done{background:#1a73e8}
+    .step.active{background:#f9ab00}
+
+    .hidden{display:none!important}
+    .export-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}
+    .divider{border:none;border-top:1px solid #f0f0f0;margin:14px 0}
+
+    @media(max-width:600px){
+      .navbar-brand h1{font-size:0.88rem}
+      .stats-grid{grid-template-columns:1fr 1fr}
+      .login-card{padding:26px 18px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ LOGIN ═══════════════════════ -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="pill">Sistem Absensi</span>
+      <span class="icon">💊</span>
+      <h2>APOTEK AULIA</h2>
+      <div class="sub">Sistem Absensi Karyawan Digital</div>
+    </div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="login-user" placeholder="Masukkan username"
+             onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="Masukkan password"
+             onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div id="login-err" class="alert alert-warn hidden"></div>
+    <button class="btn btn-primary" onclick="doLogin()">Masuk</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ APP ═══════════════════════ -->
+<div id="app" class="hidden">
+
+  <div class="navbar">
+    <div class="navbar-brand">
+      <div class="logo-icon">💊</div>
+      <div>
+        <h1>APOTEK AULIA</h1>
+        <p>Sistem Absensi Karyawan</p>
+      </div>
+    </div>
+    <div class="nav-links">
+      <button id="nav-absen"   class="active" onclick="showPage('absen')">Absen</button>
+      <button id="nav-omset"                  onclick="showPage('omset')">Omset</button>
+      <button id="nav-laporan"                onclick="showPage('laporan')">Laporan</button>
+      <button id="nav-admin"   class="hidden" onclick="showPage('admin')">Admin</button>
+      <button onclick="doLogout()">Keluar</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ══════════════ PAGE: ABSENSI ══════════════ -->
+    <div id="page-absen">
+
+      <div id="gps-box" class="gps-status checking">
+        <div class="gps-dot"></div>
+        <span id="gps-msg">Memeriksa lokasi GPS…</span>
+      </div>
+
+      <div class="card">
+        <h2>📸 Absensi Foto Selfie – Apotek Aulia</h2>
+        <div id="absen-alert"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:12px">
+          <div class="form-group" style="margin:0">
+            <label>Karyawan</label>
+            <input type="text" id="nama-display" readonly/>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Jam Sekarang</label>
+            <input type="text" id="jam-live" readonly
+                   style="font-weight:700;color:#1a73e8;font-size:1rem"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="text" id="tgl-display" readonly/>
+        </div>
+
+        <div class="step-indicator">
+          <div class="step active" id="step1"></div>
+          <div class="step"        id="step2"></div>
+        </div>
+
+        <!-- STEP 1: KAMERA -->
+        <div id="step-kamera">
+          <p style="font-size:0.84rem;color:#666;text-align:center;margin-bottom:12px">
+            Arahkan wajah ke kamera depan, lalu tekan tombol 📷 untuk mengambil foto
+          </p>
+          <div class="camera-wrap" id="camera-wrap">
+            <video id="video-preview" autoplay muted playsinline></video>
+            <div class="face-guide"></div>
+            <div class="camera-overlay">
+              <button class="capture-btn" id="btn-capture"
+                      onclick="ambilFoto()" title="Ambil Foto" disabled>📷</button>
+            </div>
+          </div>
+          <canvas id="canvas-snap"></canvas>
+          <div id="kamera-err" class="alert alert-danger hidden"></div>
+          <button class="btn btn-primary" id="btn-start-cam" onclick="startCamera()">
+            🎥 Aktifkan Kamera
+          </button>
+        </div>
+
+        <!-- STEP 2: KONFIRMASI -->
+        <div id="step-konfirmasi" class="hidden">
+          <p style="font-size:0.84rem;color:#2e7d32;text-align:center;margin-bottom:10px;font-weight:600">
+            ✅ Foto diambil — Periksa sebelum submit
+          </p>
+          <div class="selfie-result">
+            <img id="foto-preview" src="" alt="Foto Selfie"/>
+            <div class="selfie-stamp">
+              <span id="stamp-nama"></span>
+              <span id="stamp-waktu"></span>
+              <span id="stamp-lokasi"></span>
+              <span style="opacity:0.7">Apotek Aulia</span>
+            </div>
+          </div>
+          <button class="retake-btn" onclick="retakeFoto()">🔄 Ambil Ulang Foto</button>
+
+          <div class="form-group">
+            <label>Jenis Absen</label>
+            <select id="jenis-absen">
+              <option value="masuk">Absen Masuk</option>
+              <option value="pulang">Absen Pulang</option>
+            </select>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button class="btn btn-primary" onclick="submitAbsen()">✅ Submit Absen</button>
+            <button class="btn btn-outline" onclick="retakeFoto()">🔄 Ulang Foto</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📅 Status Absensi Hari Ini – Apotek Aulia</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Karyawan</th>
+                <th>Foto Masuk</th><th>Jam Masuk</th>
+                <th>Foto Pulang</th><th>Jam Pulang</th>
+                <th>Durasi</th><th>Omset</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="today-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page-absen -->
+
+    <!-- ══════════════ PAGE: OMSET ══════════════ -->
+    <div id="page-omset" class="hidden">
+      <div class="card">
+        <h2>💰 Submit Omset – Apotek Aulia</h2>
+        <div id="omset-page-alert"></div>
+
+        <!-- Karyawan -->
+        <div id="omset-karyawan-section">
+          <div class="alert alert-info">
+            Input omset penjualan Anda hari ini di Apotek Aulia.
+            <strong>Setelah submit, data terkunci dan tidak dapat diubah.</strong>
+            Hubungi admin jika ada koreksi.
+          </div>
+          <div id="omset-karyawan-form">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+              <div class="form-group">
+                <label>Nama</label>
+                <input type="text" id="omset-k-nama" readonly/>
+              </div>
+              <div class="form-group">
+                <label>Tanggal</label>
+                <input type="text" id="omset-k-tgl" readonly/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Total Omset (Rp)</label>
+              <input type="number" id="omset-k-nilai" placeholder="Contoh: 2500000" min="0"/>
+            </div>
+            <div class="form-group">
+              <label>Catatan</label>
+              <input type="text" id="omset-k-catatan" placeholder="Opsional…"/>
+            </div>
+            <button class="btn btn-success" onclick="submitOmsetKaryawan()">
+              💾 Submit Omset
+            </button>
+          </div>
+
+          <div id="omset-karyawan-locked" class="hidden">
+            <div class="omset-card submitted">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <strong style="color:#2e7d32">✅ Omset Sudah Disubmit</strong>
+                <span class="badge badge-locked">🔒 Terkunci</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+                <div class="form-group">
+                  <label>Total Omset</label>
+                  <input type="text" id="omset-k

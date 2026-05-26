@@ -1,396 +1,316 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sistem Absensi – Apotek Aulia</title>
+  <title>Absensi Apotek</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; }
 
-    .navbar{
-      background:linear-gradient(135deg,#1a73e8,#0d47a1);
-      color:white;padding:14px 20px;
-      display:flex;justify-content:space-between;align-items:center;
-      box-shadow:0 2px 10px rgba(0,0,0,0.25);
+    /* NAVBAR */
+    .navbar {
+      background: #1a73e8; color: white;
+      padding: 14px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
-    .navbar-brand{display:flex;align-items:center;gap:10px}
-    .navbar-brand .logo-icon{font-size:1.6rem}
-    .navbar-brand h1{font-size:1rem;line-height:1.2;font-weight:700}
-    .navbar-brand p{font-size:0.72rem;opacity:0.8}
-    .nav-links{display:flex;gap:6px;flex-wrap:wrap}
-    .nav-links button{
-      background:rgba(255,255,255,0.15);color:white;
-      border:1px solid rgba(255,255,255,0.3);
-      padding:6px 13px;border-radius:6px;cursor:pointer;
-      font-size:0.82rem;transition:background 0.2s
+    .navbar h1 { font-size: 1.1rem; }
+    .navbar .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .navbar button {
+      background: rgba(255,255,255,0.2); color: white;
+      border: 1px solid rgba(255,255,255,0.4);
+      padding: 6px 14px; border-radius: 6px;
+      cursor: pointer; font-size: 0.85rem; transition: background 0.2s;
     }
-    .nav-links button:hover{background:rgba(255,255,255,0.3)}
-    .nav-links button.active{background:white;color:#1a73e8;font-weight:700}
+    .navbar button:hover { background: rgba(255,255,255,0.35); }
+    .navbar button.active { background: white; color: #1a73e8; font-weight: 600; }
 
-    .container{max-width:960px;margin:22px auto;padding:0 14px}
+    /* CONTAINER */
+    .container { max-width: 960px; margin: 24px auto; padding: 0 16px; }
 
-    .card{
-      background:white;border-radius:14px;
-      padding:22px;box-shadow:0 2px 14px rgba(0,0,0,0.08);
-      margin-bottom:18px
+    /* CARD */
+    .card {
+      background: white; border-radius: 12px;
+      padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
     }
-    .card h2{
-      font-size:0.97rem;color:#222;
-      margin-bottom:14px;padding-bottom:10px;
-      border-bottom:2px solid #e8f0fe;
-      display:flex;align-items:center;gap:7px
-    }
-
-    .form-group{margin-bottom:13px}
-    label{display:block;font-size:0.82rem;color:#555;margin-bottom:5px;font-weight:600}
-    input,select,textarea{
-      width:100%;padding:9px 13px;
-      border:1.5px solid #ddd;border-radius:8px;
-      font-size:0.92rem;transition:border 0.2s;outline:none;font-family:inherit
-    }
-    input:focus,select:focus{border-color:#1a73e8}
-    input[readonly],input:disabled{background:#f5f5f5;color:#666}
-
-    .btn{
-      width:100%;padding:11px;border:none;border-radius:8px;
-      font-size:0.97rem;font-weight:700;cursor:pointer;
-      transition:transform 0.1s,opacity 0.2s
-    }
-    .btn:active{transform:scale(0.98)}
-    .btn:disabled{opacity:0.42;cursor:not-allowed}
-    .btn-primary{background:#1a73e8;color:white}
-    .btn-success{background:#34a853;color:white}
-    .btn-danger{background:#ea4335;color:white}
-    .btn-warn{background:#f9ab00;color:white}
-    .btn-outline{
-      background:white;border:1.5px solid #1a73e8;color:#1a73e8;
-      padding:7px 15px;border-radius:6px;cursor:pointer;font-size:0.83rem
-    }
-    .btn-sm{padding:7px 13px;font-size:0.8rem;width:auto;background:#1a73e8;color:white;border-radius:6px;border:none;cursor:pointer}
-    .btn-sm-success{padding:7px 13px;font-size:0.8rem;width:auto;background:#34a853;color:white;border-radius:6px;border:none;cursor:pointer}
-    .btn-sm-danger{padding:7px 13px;font-size:0.8rem;width:auto;background:#ea4335;color:white;border-radius:6px;border:none;cursor:pointer}
-    .btn-sm-warn{padding:7px 13px;font-size:0.8rem;width:auto;background:#f9ab00;color:white;border-radius:6px;border:none;cursor:pointer}
-
-    .gps-status{
-      display:flex;align-items:center;gap:10px;
-      padding:11px 15px;border-radius:8px;
-      font-size:0.88rem;margin-bottom:14px
-    }
-    .gps-status.checking{background:#fff8e1;color:#f57c00;border:1px solid #ffe082}
-    .gps-status.allowed{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
-    .gps-status.denied{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
-    .gps-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-    .checking .gps-dot{background:#f57c00;animation:pulse 1s infinite}
-    .allowed  .gps-dot{background:#2e7d32}
-    .denied   .gps-dot{background:#c62828}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-
-    .camera-wrap{
-      position:relative;width:100%;max-width:320px;
-      margin:0 auto 14px;border-radius:14px;overflow:hidden;
-      background:#111;aspect-ratio:3/4;
-      box-shadow:0 4px 20px rgba(0,0,0,0.3)
-    }
-    #video-preview{
-      width:100%;height:100%;object-fit:cover;
-      transform:scaleX(-1);display:block
-    }
-    #canvas-snap{display:none}
-    .camera-overlay{
-      position:absolute;inset:0;
-      display:flex;flex-direction:column;
-      justify-content:flex-end;align-items:center;
-      padding-bottom:16px;
-      background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 55%)
-    }
-    .face-guide{
-      position:absolute;top:50%;left:50%;
-      transform:translate(-50%,-60%);
-      width:130px;height:160px;
-      border:3px solid rgba(255,255,255,0.6);
-      border-radius:50%;pointer-events:none
-    }
-    .capture-btn{
-      width:64px;height:64px;border-radius:50%;
-      background:white;border:4px solid rgba(255,255,255,0.45);
-      cursor:pointer;display:flex;align-items:center;justify-content:center;
-      font-size:1.7rem;transition:transform 0.15s;
-      box-shadow:0 2px 12px rgba(0,0,0,0.35)
-    }
-    .capture-btn:hover{transform:scale(1.08)}
-    .capture-btn:disabled{opacity:0.38;cursor:not-allowed}
-    .selfie-result{
-      width:100%;max-width:320px;margin:0 auto 12px;
-      border-radius:14px;overflow:hidden;position:relative;
-      box-shadow:0 4px 18px rgba(0,0,0,0.2)
-    }
-    .selfie-result img{width:100%;display:block;transform:scaleX(-1)}
-    .selfie-stamp{
-      position:absolute;bottom:0;left:0;right:0;
-      background:rgba(0,0,0,0.58);color:white;
-      font-size:0.7rem;padding:7px 10px;
-      display:flex;flex-direction:column;gap:2px
-    }
-    .retake-btn{
-      display:block;width:100%;max-width:320px;margin:0 auto 10px;
-      padding:9px;background:rgba(234,67,53,0.08);color:#ea4335;
-      border:1.5px solid #ea4335;border-radius:8px;
-      font-size:0.87rem;font-weight:600;cursor:pointer
+    .card h2 {
+      font-size: 1rem; color: #333;
+      margin-bottom: 16px; padding-bottom: 10px;
+      border-bottom: 2px solid #e8f0fe;
+      display: flex; align-items: center; gap: 8px;
     }
 
-    .badge{padding:3px 10px;border-radius:20px;font-size:0.74rem;font-weight:600;white-space:nowrap}
-    .badge-masuk{background:#e3f2fd;color:#1565c0}
-    .badge-pulang{background:#e8f5e9;color:#2e7d32}
-    .badge-terlambat{background:#fff3e0;color:#e65100}
-    .badge-locked{background:#fce4ec;color:#c62828}
-    .badge-done{background:#e8f5e9;color:#2e7d32}
-    .badge-pending{background:#fff8e1;color:#f57c00}
-
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:0.83rem}
-    thead tr{background:#e8f0fe}
-    th{padding:9px 11px;text-align:left;color:#1a73e8;font-weight:700;white-space:nowrap}
-    td{padding:8px 11px;border-bottom:1px solid #f0f0f0;color:#333;white-space:nowrap}
-    tr:hover td{background:#f8faff}
-    .foto-thumb{
-      width:40px;height:40px;border-radius:7px;object-fit:cover;
-      cursor:pointer;border:2px solid #e8f0fe;
-      transition:transform 0.2s;transform:scaleX(-1)
+    /* GPS */
+    .gps-status {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; border-radius: 8px;
+      font-size: 0.9rem; margin-bottom: 16px;
     }
-    .foto-thumb:hover{transform:scaleX(-1) scale(1.18)}
+    .gps-status.checking { background:#fff8e1; color:#f57c00; border:1px solid #ffe082; }
+    .gps-status.allowed  { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .gps-status.denied   { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; }
+    .gps-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .checking .gps-dot { background:#f57c00; animation:pulse 1s infinite; }
+    .allowed  .gps-dot { background:#2e7d32; }
+    .denied   .gps-dot { background:#c62828; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
-    .stat-card{background:white;border-radius:10px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
-    .stat-card .val{font-size:1.45rem;font-weight:700;color:#1a73e8}
-    .stat-card .lbl{font-size:0.75rem;color:#777;margin-top:3px}
-
-    .alert{padding:11px 15px;border-radius:8px;font-size:0.87rem;margin-bottom:12px}
-    .alert-info{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
-    .alert-success{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
-    .alert-warn{background:#fff8e1;color:#e65100;border:1px solid #ffcc02}
-    .alert-danger{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
-
-    .omset-card{border:2px solid #e8f0fe;border-radius:10px;padding:16px;margin-top:12px;background:#f8fbff}
-    .omset-card.submitted{border-color:#c8e6c9;background:#f1f8e9}
-    .lock-info{
-      display:flex;align-items:center;gap:8px;
-      background:#ffebee;border:1px solid #ffcdd2;
-      color:#c62828;padding:9px 13px;border-radius:8px;font-size:0.84rem;margin-top:9px
+    /* FORM */
+    .form-group { margin-bottom: 14px; }
+    label { display:block; font-size:0.85rem; color:#555; margin-bottom:5px; font-weight:600; }
+    input, select, textarea {
+      width:100%; padding:10px 14px;
+      border:1.5px solid #ddd; border-radius:8px;
+      font-size:0.95rem; transition:border 0.2s; outline:none;
+      font-family: inherit;
     }
-    .lock-info.ok{background:#e8f5e9;border-color:#a5d6a7;color:#2e7d32}
+    input:focus, select:focus, textarea:focus { border-color:#1a73e8; }
+    input[readonly], input:disabled { background:#f5f5f5; color:#666; }
 
-    .tab-btns{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
-    .tab-btn{padding:6px 16px;border-radius:20px;border:1.5px solid #ddd;background:white;color:#555;cursor:pointer;font-size:0.82rem;transition:all 0.2s}
-    .tab-btn.active{background:#1a73e8;color:white;border-color:#1a73e8}
+    /* BUTTONS */
+    .btn {
+      width:100%; padding:12px; border:none;
+      border-radius:8px; font-size:1rem; font-weight:600;
+      cursor:pointer; transition:transform 0.1s, opacity 0.2s;
+    }
+    .btn:active { transform:scale(0.98); }
+    .btn:disabled { opacity:0.45; cursor:not-allowed; }
+    .btn-primary { background:#1a73e8; color:white; }
+    .btn-success { background:#34a853; color:white; }
+    .btn-danger  { background:#ea4335; color:white; }
+    .btn-warn    { background:#f9ab00; color:white; }
+    .btn-outline {
+      background:white; border:1.5px solid #1a73e8; color:#1a73e8;
+      padding:8px 16px; border-radius:6px; cursor:pointer; font-size:0.85rem;
+    }
+    .btn-sm {
+      padding:7px 14px; font-size:0.82rem; width:auto;
+      background:#1a73e8; color:white;
+      border-radius:6px; border:none; cursor:pointer;
+    }
+    .btn-sm-warn {
+      padding:7px 14px; font-size:0.82rem; width:auto;
+      background:#f9ab00; color:white;
+      border-radius:6px; border:none; cursor:pointer;
+    }
+    .btn-sm-success {
+      padding:7px 14px; font-size:0.82rem; width:auto;
+      background:#34a853; color:white;
+      border-radius:6px; border:none; cursor:pointer;
+    }
+    .btn-sm-danger {
+      padding:7px 14px; font-size:0.82rem; width:auto;
+      background:#ea4335; color:white;
+      border-radius:6px; border:none; cursor:pointer;
+    }
 
-    .filter-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
-    .filter-row .fg{flex:1;min-width:130px}
-    .filter-row label{font-size:0.79rem;color:#555;font-weight:600;margin-bottom:4px;display:block}
-    .filter-row input,.filter-row select{width:100%}
+    /* BADGE */
+    .badge {
+      padding:3px 10px; border-radius:20px;
+      font-size:0.76rem; font-weight:600; white-space:nowrap;
+    }
+    .badge-masuk     { background:#e3f2fd; color:#1565c0; }
+    .badge-pulang    { background:#e8f5e9; color:#2e7d32; }
+    .badge-hadir     { background:#e8f5e9; color:#2e7d32; }
+    .badge-terlambat { background:#fff3e0; color:#e65100; }
+    .badge-locked    { background:#fce4ec; color:#c62828; }
+    .badge-done      { background:#e8f5e9; color:#2e7d32; }
+    .badge-pending   { background:#fff8e1; color:#f57c00; }
 
-    #login-page{
-      min-height:100vh;display:flex;align-items:center;justify-content:center;
-      background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%)
-    }
-    .login-card{
-      background:white;border-radius:18px;padding:36px 30px;
-      width:100%;max-width:390px;box-shadow:0 10px 40px rgba(0,0,0,0.25)
-    }
-    .login-logo{text-align:center;margin-bottom:24px}
-    .login-logo .pill{
-      display:inline-block;background:#e8f0fe;
-      color:#1a73e8;font-size:0.72rem;font-weight:700;
-      letter-spacing:1px;padding:3px 12px;border-radius:20px;
-      margin-bottom:8px;text-transform:uppercase
-    }
-    .login-logo .icon{font-size:3rem;display:block;margin-bottom:4px}
-    .login-logo h2{color:#1a1a1a;font-size:1.35rem;font-weight:800;letter-spacing:-0.5px}
-    .login-logo .apotek-name{color:#1a73e8;font-size:1rem;font-weight:700;margin-top:2px}
-    .login-logo .sub{color:#999;font-size:0.76rem;margin-top:4px}
+    /* TABLE */
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:0.86rem; }
+    thead tr { background:#e8f0fe; }
+    th { padding:10px 12px; text-align:left; color:#1a73e8; font-weight:700; white-space:nowrap; }
+    td { padding:9px 12px; border-bottom:1px solid #f0f0f0; color:#333; white-space:nowrap; }
+    tr:hover td { background:#f8faff; }
 
-    .modal-overlay{
-      position:fixed;inset:0;background:rgba(0,0,0,0.52);
-      display:flex;align-items:center;justify-content:center;
-      z-index:9999;padding:14px
+    /* STATS */
+    .stats-grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:14px; margin-bottom:20px;
     }
-    .modal{
-      background:white;border-radius:14px;padding:26px;
-      width:100%;max-width:440px;box-shadow:0 8px 32px rgba(0,0,0,0.22)
+    .stat-card {
+      background:white; border-radius:10px; padding:18px;
+      text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);
     }
-    .modal h3{font-size:1rem;margin-bottom:14px;color:#333}
-    .modal-btns{display:flex;gap:9px;margin-top:16px}
-    .modal-btns button{flex:1}
+    .stat-card .val { font-size:1.5rem; font-weight:700; color:#1a73e8; }
+    .stat-card .lbl { font-size:0.78rem; color:#777; margin-top:4px; }
 
-    .lightbox{
-      position:fixed;inset:0;background:rgba(0,0,0,0.9);
-      display:flex;align-items:center;justify-content:center;
-      z-index:99999;cursor:pointer;padding:16px;flex-direction:column;gap:12px
-    }
-    .lightbox img{
-      max-width:min(380px,88vw);max-height:80vh;
-      border-radius:14px;transform:scaleX(-1);
-      box-shadow:0 8px 40px rgba(0,0,0,0.5)
-    }
-    .lightbox-info{color:rgba(255,255,255,0.75);font-size:0.8rem;text-align:center}
+    /* ALERT */
+    .alert { padding:12px 16px; border-radius:8px; font-size:0.9rem; margin-bottom:14px; }
+    .alert-info    { background:#e3f2fd; color:#1565c0; border:1px solid #90caf9; }
+    .alert-success { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .alert-warn    { background:#fff8e1; color:#e65100; border:1px solid #ffcc02; }
+    .alert-danger  { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; }
 
-    .step-indicator{display:flex;gap:6px;margin-bottom:16px}
-    .step{flex:1;height:4px;border-radius:2px;background:#e0e0e0;transition:background 0.3s}
-    .step.done{background:#1a73e8}
-    .step.active{background:#f9ab00}
+    /* OMSET SECTION */
+    .omset-card {
+      border:2px solid #e8f0fe; border-radius:10px; padding:18px;
+      margin-top:14px; background:#f8fbff;
+    }
+    .omset-card.locked {
+      border-color:#ffcdd2; background:#fff8f8;
+    }
+    .omset-card.submitted {
+      border-color:#c8e6c9; background:#f1f8e9;
+    }
+    .omset-header {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:14px;
+    }
+    .omset-header h3 { font-size:0.95rem; color:#333; }
+    .lock-info {
+      display:flex; align-items:center; gap:8px;
+      background:#ffebee; border:1px solid #ffcdd2;
+      color:#c62828; padding:10px 14px; border-radius:8px;
+      font-size:0.88rem; margin-top:10px;
+    }
+    .lock-info.success {
+      background:#e8f5e9; border-color:#a5d6a7; color:#2e7d32;
+    }
 
-    .hidden{display:none!important}
-    .export-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}
-    .divider{border:none;border-top:1px solid #f0f0f0;margin:14px 0}
+    /* TAB */
+    .tab-btns { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+    .tab-btn {
+      padding:7px 18px; border-radius:20px;
+      border:1.5px solid #ddd; background:white;
+      color:#555; cursor:pointer; font-size:0.85rem; transition:all 0.2s;
+    }
+    .tab-btn.active { background:#1a73e8; color:white; border-color:#1a73e8; }
+
+    /* FILTER */
+    .filter-row {
+      display:flex; gap:10px; flex-wrap:wrap;
+      align-items:center; margin-bottom:14px;
+    }
+    .filter-row input, .filter-row select { width:auto; flex:1; min-width:130px; }
+
+    /* LOGIN */
+    #login-page {
+      min-height:100vh; display:flex;
+      align-items:center; justify-content:center;
+      background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%);
+    }
+    .login-card {
+      background:white; border-radius:16px;
+      padding:36px 32px; width:100%; max-width:380px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.2);
+    }
+    .login-card .logo { text-align:center; margin-bottom:24px; }
+    .login-card .logo span { font-size:2.5rem; }
+    .login-card .logo h2 { color:#1a73e8; margin-top:8px; }
+    .login-card .logo p  { color:#777; font-size:0.85rem; }
+
+    /* MODAL */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.45);
+      display:flex; align-items:center; justify-content:center;
+      z-index:999; padding:16px;
+    }
+    .modal {
+      background:white; border-radius:14px;
+      padding:28px; width:100%; max-width:460px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.2);
+    }
+    .modal h3 { font-size:1.05rem; margin-bottom:18px; color:#333; }
+    .modal-btns { display:flex; gap:10px; margin-top:18px; }
+    .modal-btns button { flex:1; }
+
+    /* EXPORT */
+    .export-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+
+    /* HIDDEN */
+    .hidden { display:none !important; }
 
     @media(max-width:600px){
-      .navbar-brand h1{font-size:0.88rem}
-      .stats-grid{grid-template-columns:1fr 1fr}
-      .login-card{padding:26px 18px}
+      .navbar h1 { font-size:0.9rem; }
+      .stats-grid { grid-template-columns:1fr 1fr; }
+      .login-card { padding:24px 18px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════ LOGIN ═══════════════════════ -->
 <div id="login-page">
   <div class="login-card">
-    <div class="login-logo">
-      <span class="pill">Sistem Absensi</span>
-      <span class="icon">💊</span>
-      <h2>APOTEK AULIA</h2>
-      <div class="sub">Sistem Absensi Karyawan Digital</div>
+    <div class="logo">
+      <span>💊</span>
+      <h2>Apotek Sehat</h2>
+      <p>Sistem Absensi &amp; Omset</p>
     </div>
     <div class="form-group">
       <label>Username</label>
-      <input type="text" id="login-user" placeholder="Masukkan username"
-             onkeydown="if(event.key==='Enter')doLogin()"/>
+      <input type="text" id="login-user" placeholder="Username" onkeydown="if(event.key==='Enter')doLogin()"/>
     </div>
     <div class="form-group">
       <label>Password</label>
-      <input type="password" id="login-pass" placeholder="Masukkan password"
-             onkeydown="if(event.key==='Enter')doLogin()"/>
+      <input type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/>
     </div>
     <div id="login-err" class="alert alert-warn hidden"></div>
     <button class="btn btn-primary" onclick="doLogin()">Masuk</button>
+    <p style="text-align:center;font-size:0.78rem;color:#aaa;margin-top:14px;">
+      Demo — Admin: <b>admin</b> / <b>admin123</b><br>
+      Karyawan: <b>siti</b> / <b>siti123</b>
+    </p>
   </div>
 </div>
 
-<!-- ═══════════════════════ APP ═══════════════════════ -->
 <div id="app" class="hidden">
 
   <div class="navbar">
-    <div class="navbar-brand">
-      <div class="logo-icon">💊</div>
-      <div>
-        <h1>APOTEK AULIA</h1>
-        <p>Sistem Absensi Karyawan</p>
-      </div>
-    </div>
+    <h1>💊 Apotek Sehat</h1>
     <div class="nav-links">
-      <button id="nav-absen"   class="active" onclick="showPage('absen')">Absen</button>
-      <button id="nav-omset"                  onclick="showPage('omset')">Omset</button>
-      <button id="nav-laporan"                onclick="showPage('laporan')">Laporan</button>
-      <button id="nav-admin"   class="hidden" onclick="showPage('admin')">Admin</button>
+      <button id="nav-absen"   class="active"  onclick="showPage('absen')">Absen</button>
+      <button id="nav-omset"                   onclick="showPage('omset')">Omset</button>
+      <button id="nav-laporan"                 onclick="showPage('laporan')">Laporan</button>
+      <button id="nav-admin"   class="hidden"  onclick="showPage('admin')">Admin</button>
       <button onclick="doLogout()">Keluar</button>
     </div>
   </div>
 
   <div class="container">
 
-    <!-- ══════════════ PAGE: ABSENSI ══════════════ -->
     <div id="page-absen">
-
       <div id="gps-box" class="gps-status checking">
         <div class="gps-dot"></div>
-        <span id="gps-msg">Memeriksa lokasi GPS…</span>
+        <span id="gps-msg">Memeriksa lokasi…</span>
       </div>
 
       <div class="card">
-        <h2>📸 Absensi Foto Selfie – Apotek Aulia</h2>
+        <h2>📋 Absensi Harian</h2>
         <div id="absen-alert"></div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:12px">
-          <div class="form-group" style="margin:0">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
             <label>Karyawan</label>
             <input type="text" id="nama-display" readonly/>
           </div>
-          <div class="form-group" style="margin:0">
-            <label>Jam Sekarang</label>
-            <input type="text" id="jam-live" readonly
-                   style="font-weight:700;color:#1a73e8;font-size:1rem"/>
+          <div class="form-group">
+            <label>Tanggal</label>
+            <input type="text" id="tgl-display" readonly/>
           </div>
         </div>
         <div class="form-group">
-          <label>Tanggal</label>
-          <input type="text" id="tgl-display" readonly/>
+          <label>Jam Sekarang</label>
+          <input type="text" id="jam-live" readonly style="font-weight:700;color:#1a73e8;font-size:1.1rem;"/>
         </div>
 
-        <div class="step-indicator">
-          <div class="step active" id="step1"></div>
-          <div class="step"        id="step2"></div>
-        </div>
-
-        <!-- STEP 1: KAMERA -->
-        <div id="step-kamera">
-          <p style="font-size:0.84rem;color:#666;text-align:center;margin-bottom:12px">
-            Arahkan wajah ke kamera depan, lalu tekan tombol 📷 untuk mengambil foto
-          </p>
-          <div class="camera-wrap" id="camera-wrap">
-            <video id="video-preview" autoplay muted playsinline></video>
-            <div class="face-guide"></div>
-            <div class="camera-overlay">
-              <button class="capture-btn" id="btn-capture"
-                      onclick="ambilFoto()" title="Ambil Foto" disabled>📷</button>
-            </div>
-          </div>
-          <canvas id="canvas-snap"></canvas>
-          <div id="kamera-err" class="alert alert-danger hidden"></div>
-          <button class="btn btn-primary" id="btn-start-cam" onclick="startCamera()">
-            🎥 Aktifkan Kamera
-          </button>
-        </div>
-
-        <!-- STEP 2: KONFIRMASI -->
-        <div id="step-konfirmasi" class="hidden">
-          <p style="font-size:0.84rem;color:#2e7d32;text-align:center;margin-bottom:10px;font-weight:600">
-            ✅ Foto diambil — Periksa sebelum submit
-          </p>
-          <div class="selfie-result">
-            <img id="foto-preview" src="" alt="Foto Selfie"/>
-            <div class="selfie-stamp">
-              <span id="stamp-nama"></span>
-              <span id="stamp-waktu"></span>
-              <span id="stamp-lokasi"></span>
-              <span style="opacity:0.7">Apotek Aulia</span>
-            </div>
-          </div>
-          <button class="retake-btn" onclick="retakeFoto()">🔄 Ambil Ulang Foto</button>
-
-          <div class="form-group">
-            <label>Jenis Absen</label>
-            <select id="jenis-absen">
-              <option value="masuk">Absen Masuk</option>
-              <option value="pulang">Absen Pulang</option>
-            </select>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <button class="btn btn-primary" onclick="submitAbsen()">✅ Submit Absen</button>
-            <button class="btn btn-outline" onclick="retakeFoto()">🔄 Ulang Foto</button>
-          </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
+          <button class="btn btn-primary" id="btn-masuk"  onclick="absenMasuk()">🟢 Absen Masuk</button>
+          <button class="btn btn-success" id="btn-pulang" onclick="absenPulang()" disabled>🔴 Absen Pulang</button>
         </div>
       </div>
 
       <div class="card">
-        <h2>📅 Status Absensi Hari Ini – Apotek Aulia</h2>
+        <h2>📅 Status Absensi Hari Ini</h2>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Karyawan</th>
-                <th>Foto Masuk</th><th>Jam Masuk</th>
-                <th>Foto Pulang</th><th>Jam Pulang</th>
+                <th>Karyawan</th><th>Jam Masuk</th><th>Jam Pulang</th>
                 <th>Durasi</th><th>Omset</th><th>Status</th>
               </tr>
             </thead>
@@ -398,24 +318,19 @@
           </table>
         </div>
       </div>
+    </div>
 
-    </div><!-- /page-absen -->
-
-    <!-- ══════════════ PAGE: OMSET ══════════════ -->
     <div id="page-omset" class="hidden">
       <div class="card">
-        <h2>💰 Submit Omset – Apotek Aulia</h2>
+        <h2>💰 Submit Omset</h2>
         <div id="omset-page-alert"></div>
 
-        <!-- Karyawan -->
         <div id="omset-karyawan-section">
           <div class="alert alert-info">
-            Input omset penjualan Anda hari ini di Apotek Aulia.
-            <strong>Setelah submit, data terkunci dan tidak dapat diubah.</strong>
-            Hubungi admin jika ada koreksi.
+            Submit omset penjualan Anda hari ini. <strong>Setelah submit, data tidak dapat diubah.</strong>
           </div>
           <div id="omset-karyawan-form">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
               <div class="form-group">
                 <label>Nama</label>
                 <input type="text" id="omset-k-nama" readonly/>
@@ -433,18 +348,735 @@
               <label>Catatan</label>
               <input type="text" id="omset-k-catatan" placeholder="Opsional…"/>
             </div>
-            <button class="btn btn-success" onclick="submitOmsetKaryawan()">
+            <button class="btn btn-success" id="btn-submit-omset-k" onclick="submitOmsetKaryawan()">
               💾 Submit Omset
             </button>
           </div>
 
           <div id="omset-karyawan-locked" class="hidden">
             <div class="omset-card submitted">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                <strong style="color:#2e7d32">✅ Omset Sudah Disubmit</strong>
-                <span class="badge badge-locked">🔒 Terkunci</span>
+              <div class="omset-header">
+                <h3>✅ Omset Hari Ini Sudah Disubmit</h3>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div class="form-group">
                   <label>Total Omset</label>
-                  <input type="text" id="omset-k
+                  <input type="text" id="omset-k-locked-nilai" readonly/>
+                </div>
+                <div class="form-group">
+                  <label>Catatan</label>
+                  <input type="text" id="omset-k-locked-catatan" readonly/>
+                </div>
+              </div>
+              <div class="lock-info success">
+                🔒 Data omset telah terkunci. Hubungi admin jika ada kesalahan.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="omset-admin-section" class="hidden">
+          <div class="alert alert-info">
+            Sebagai admin, Anda dapat submit dan mengedit omset karyawan kapan saja.
+          </div>
+
+          <div class="filter-row" style="margin-bottom:16px;">
+            <div style="flex:1;min-width:150px;">
+              <label style="font-size:0.82rem;color:#555;font-weight:600;">Tanggal</label>
+              <input type="date" id="omset-admin-tgl"/>
+            </div>
+            <div style="flex:1;min-width:150px;">
+              <label style="font-size:0.82rem;color:#555;font-weight:600;">Karyawan</label>
+              <select id="omset-admin-karyawan">
+                <option value="">— Pilih Karyawan —</option>
+              </select>
+            </div>
+            <div style="align-self:flex-end;">
+              <button class="btn-sm" onclick="loadOmsetAdmin()">Tampilkan</button>
+            </div>
+          </div>
+
+          <div id="omset-admin-form-wrap" class="hidden">
+            <div class="omset-card" id="omset-admin-card">
+              <div class="omset-header">
+                <h3 id="omset-admin-title">📝 Input Omset</h3>
+                <span id="omset-admin-status-badge"></span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label>Total Omset (Rp)</label>
+                  <input type="number" id="omset-admin-nilai" placeholder="Contoh: 3000000" min="0"/>
+                </div>
+                <div class="form-group">
+                  <label>Catatan</label>
+                  <input type="text" id="omset-admin-catatan" placeholder="Opsional…"/>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn-sm-success" id="btn-omset-admin-save" onclick="saveOmsetAdmin()">
+                  💾 Simpan Omset
+                </button>
+                <button class="btn-sm-danger hidden" id="btn-omset-admin-reset" onclick="resetOmsetAdmin()">
+                  🔄 Reset Omset
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="omset-admin-empty" class="hidden alert alert-warn">
+            Karyawan ini belum absen pada tanggal tersebut. Absensi harus ada terlebih dahulu.
+          </div>
+
+          <div style="margin-top:20px;">
+            <h3 style="font-size:0.95rem;color:#333;margin-bottom:12px;">📊 Rekap Omset Hari Ini</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Karyawan</th><th>Jam Masuk</th><th>Jam Pulang</th>
+                    <th>Omset</th><th>Catatan</th><th>Status</th><th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="omset-rekap-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-laporan" class="hidden">
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <div class="card">
+        <h2>📊 Laporan Absensi &amp; Omset</h2>
+
+        <div class="tab-btns">
+          <button class="tab-btn active" onclick="switchTab('harian')">Harian</button>
+          <button class="tab-btn" onclick="switchTab('karyawan')">Per Karyawan</button>
+          <button class="tab-btn" onclick="switchTab('omset')">Rekap Omset</button>
+        </div>
+
+        <div class="filter-row">
+          <input type="date" id="filter-dari"/>
+          <span style="color:#777;font-size:0.9rem;">s/d</span>
+          <input type="date" id="filter-sampai"/>
+          <select id="filter-nama">
+            <option value="">Semua Karyawan</option>
+          </select>
+          <button class="btn-sm" onclick="renderLaporan()">Filter</button>
+        </div>
+
+        <div class="export-row">
+          <button class="btn-outline" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn-outline" onclick="window.print()">🖨 Print</button>
+        </div>
+
+        <div class="table-wrap">
+          <table id="laporan-table">
+            <thead id="laporan-head"></thead>
+            <tbody id="laporan-body"></tbody>
+          </table>
+        </div>
+        <p id="laporan-empty" class="hidden" style="text-align:center;color:#aaa;padding:20px;">
+          Belum ada data untuk filter ini.
+        </p>
+      </div>
+    </div>
+
+    <div id="page-admin" class="hidden">
+      <div class="card">
+        <h2>⚙️ Manajemen Karyawan</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+          <input type="text"     id="new-nama"  placeholder="Nama lengkap"  style="flex:2;min-width:140px;"/>
+          <input type="text"     id="new-user"  placeholder="Username"      style="flex:1;min-width:110px;"/>
+          <input type="password" id="new-pass"  placeholder="Password"      style="flex:1;min-width:110px;"/>
+          <select id="new-role" style="flex:1;min-width:110px;">
+            <option value="karyawan">Karyawan</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button class="btn-sm" onclick="tambahKaryawan()">+ Tambah</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nama</th><th>Username</th><th>Role</th><th>Aksi</th></tr></thead>
+            <tbody id="karyawan-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🗑️ Reset Data</h2>
+        <p style="color:#777;font-size:0.9rem;margin-bottom:12px;">
+          Hapus semua data absensi dan omset (tidak dapat dikembalikan).
+        </p>
+        <button class="btn btn-danger" style="max-width:220px;" onclick="resetSemuaData()">
+          Reset Semua Data
+        </button>
+      </div>
+    </div>
+
+  </div></div><div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-title">Konfirmasi Tindakan</h3>
+    <p id="modal-msg" style="font-size:0.9rem; color:#555; line-height:1.4;"></p>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" id="modal-confirm-btn">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- KONFIGURASI GEOLOKASI (SIMULASI RADIUS APOTEK) ---
+  const APOTEK_LAT = -6.200000;
+  const APOTEK_LON = 106.816666;
+  const MAX_RADIUS_METER = 100;
+
+  // --- CEK DAN PERBAIKI DATABASE LOKAL (SAFEGUARD) ---
+  let usersData = localStorage.getItem('users');
+  let absensiData = localStorage.getItem('absensi');
+
+  // Jika data corrupt atau kosong, reset ke default
+  try {
+    if (!usersData || JSON.parse(usersData).length === 0) throw new Error("Users kosong");
+  } catch (e) {
+    const defaultUsers = [
+      { id: 'u1', nama: 'Admin Apotek', user: 'admin', pass: 'admin123', role: 'admin' },
+      { id: 'u2', nama: 'Siti Rahma', user: 'siti', pass: 'siti123', role: 'karyawan' },
+      { id: 'u3', nama: 'Budi Santoso', user: 'budi', pass: 'budi123', role: 'karyawan' }
+    ];
+    localStorage.setItem('users', JSON.stringify(defaultUsers));
+  }
+
+  try {
+    if (!absensiData) throw new Error("Absensi kosong");
+    JSON.parse(absensiData); // Pastikan format JSON valid
+  } catch (e) {
+    localStorage.setItem('absensi', JSON.stringify([]));
+  }
+
+  // --- STATE APLIKASI ---
+  let users = JSON.parse(localStorage.getItem('users')) || [];
+  let absensi = JSON.parse(localStorage.getItem('absensi')) || [];
+  let currentUser = null;
+  let userLocation = { lat: null, lon: null, allowed: false };
+  let currentReportTab = 'harian';
+  let modalAction = null;
+
+  // --- INISIALISASI SAAT HALAMAN DIBUKA ---
+  window.onload = function() {
+    initLiveClock();
+    checkGPSLocation();
+    const savedSession = sessionStorage.getItem('currentUser');
+    if (savedSession) {
+      try {
+        currentUser = JSON.parse(savedSession);
+        if(currentUser && currentUser.id) loginSuccess();
+      } catch(e) {
+        sessionStorage.removeItem('currentUser');
+      }
+    }
+  };
+
+  function initLiveClock() {
+    setInterval(() => {
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0];
+      const liveClockInput = document.getElementById('jam-live');
+      if (liveClockInput) liveClockInput.value = timeStr;
+    }, 1000);
+  }
+
+  function getTodayDateString() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function formatIDR(angka) {
+    if (angka === null || angka === undefined || isNaN(angka)) return 'Rp 0';
+    return 'Rp ' + parseInt(angka).toLocaleString('id-ID');
+  }
+
+  function checkGPSLocation() {
+    const gpsBox = document.getElementById('gps-box');
+    const gpsMsg = document.getElementById('gps-msg');
+
+    if (!navigator.geolocation) {
+      setGPSState('denied', 'Browser tidak mendukung GPS.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        userLocation.lat = position.coords.latitude;
+        userLocation.lon = position.coords.longitude;
+        userLocation.allowed = true; // Demo mode always allowed
+        setGPSState('allowed', `Demo Mode: Akses Lokasi Diizinkan`);
+      },
+      (error) => {
+        userLocation.allowed = true; 
+        setGPSState('denied', 'GPS Mati/Akses Ditolak. (Demo Mode: Tetap Mengizinkan Absen)');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  function setGPSState(state, message) {
+    const gpsBox = document.getElementById('gps-box');
+    const gpsMsg = document.getElementById('gps-msg');
+    if(gpsBox) gpsBox.className = `gps-status ${state}`;
+    if(gpsMsg) gpsMsg.innerText = message;
+  }
+
+  // --- AUTENTIKASI (LOGIN & LOGOUT) ---
+  function doLogin() {
+    try {
+      const userVal = document.getElementById('login-user').value.trim();
+      const passVal = document.getElementById('login-pass').value.trim();
+      const errBox = document.getElementById('login-err');
+
+      errBox.classList.add('hidden');
+
+      if (!users || users.length === 0) {
+        errBox.innerText = 'Database Sistem Error. Refresh halaman ini!';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      const found = users.find(u => u.user.toLowerCase() === userVal.toLowerCase() && u.pass === passVal);
+      if (!found) {
+        errBox.innerText = 'Username atau Password salah!';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      currentUser = found;
+      sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+      loginSuccess();
+    } catch(e) {
+      console.error(e);
+      alert("Terjadi kesalahan sistem saat mencoba login.");
+    }
+  }
+
+  function loginSuccess() {
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+
+    if (currentUser.role === 'admin') {
+      document.getElementById('nav-admin').classList.remove('hidden');
+    } else {
+      document.getElementById('nav-admin').classList.add('hidden');
+    }
+
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+
+    document.getElementById('nama-display').value = currentUser.nama;
+    document.getElementById('tgl-display').value = getTodayDateString();
+
+    showPage('absen');
+    populateDropdowns();
+  }
+
+  function doLogout() {
+    currentUser = null;
+    sessionStorage.removeItem('currentUser');
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('login-page').classList.remove('hidden');
+  }
+
+  function showPage(pageName) {
+    const navs = ['absen', 'omset', 'laporan', 'admin'];
+    navs.forEach(n => {
+      const btn = document.getElementById(`nav-${n}`);
+      if(btn) btn.classList.remove('active');
+    });
+    const activeBtn = document.getElementById(`nav-${pageName}`);
+    if(activeBtn) activeBtn.classList.add('active');
+
+    document.getElementById('page-absen').classList.add('hidden');
+    document.getElementById('page-omset').classList.add('hidden');
+    document.getElementById('page-laporan').classList.add('hidden');
+    document.getElementById('page-admin').classList.add('hidden');
+
+    if (pageName === 'absen') {
+      document.getElementById('page-absen').classList.remove('hidden');
+      renderTodayAbsen();
+    } else if (pageName === 'omset') {
+      document.getElementById('page-omset').classList.remove('hidden');
+      initOmsetPage();
+    } else if (pageName === 'laporan') {
+      document.getElementById('page-laporan').classList.remove('hidden');
+      initLaporanPage();
+    } else if (pageName === 'admin' && currentUser.role === 'admin') {
+      document.getElementById('page-admin').classList.remove('hidden');
+      renderKaryawanTable();
+    }
+  }
+
+  // --- CORE ENGINE: MANAJEMEN ABSENSI ---
+  function renderTodayAbsen() {
+    const today = getTodayDateString();
+    const tbody = document.getElementById('today-table');
+    tbody.innerHTML = '';
+
+    const todayData = absensi.filter(a => a.tanggal === today);
+    const myAbsen = todayData.find(a => a.userId === currentUser.id);
+    const btnMasuk = document.getElementById('btn-masuk');
+    const btnPulang = document.getElementById('btn-pulang');
+    const alertBox = document.getElementById('absen-alert');
+    alertBox.innerHTML = '';
+
+    if (!myAbsen) {
+      btnMasuk.disabled = !userLocation.allowed;
+      btnPulang.disabled = true;
+    } else if (myAbsen && !myAbsen.jamPulang) {
+      btnMasuk.disabled = true;
+      btnPulang.disabled = !userLocation.allowed;
+      alertBox.innerHTML = `<div class="alert alert-info">Anda telah absen masuk pada jam <b>${myAbsen.jamMasuk}</b>. Jangan lupa absen pulang saat shift berakhir.</div>`;
+    } else {
+      btnMasuk.disabled = true;
+      btnPulang.disabled = true;
+      alertBox.innerHTML = `<div class="alert alert-success">🎉 Keren! Anda telah menyelesaikan absensi masuk dan pulang untuk hari ini.</div>`;
+    }
+
+    if (todayData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#aaa;">Belum ada data absensi hari ini.</td></tr>`;
+      return;
+    }
+
+    todayData.forEach(item => {
+      const tr = document.createElement('tr');
+      let durasi = '-';
+      if (item.jamMasuk && item.jamPulang) {
+        durasi = calculateWorkDuration(item.jamMasuk, item.jamPulang);
+      }
+      const statusBadge = item.jamPulang 
+        ? `<span class="badge badge-done">Selesai</span>` 
+        : `<span class="badge badge-masuk">Di Apotek</span>`;
+
+      tr.innerHTML = `
+        <td><b>${item.namaKaryawan}</b></td>
+        <td>${item.jamMasuk || '-'}</td>
+        <td>${item.jamPulang || '-'}</td>
+        <td>${durasi}</td>
+        <td>${item.omset ? formatIDR(item.omset) : '<span style="color:#aaa;">Belum input</span>'}</td>
+        <td>${statusBadge}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function absenMasuk() {
+    if (!userLocation.allowed) { alert("GPS di luar area."); return; }
+    const today = getTodayDateString();
+    const jamSekarang = document.getElementById('jam-live').value;
+
+    const barusanAbsen = {
+      id: 'abs-' + Date.now(),
+      userId: currentUser.id,
+      namaKaryawan: currentUser.nama,
+      tanggal: today,
+      jamMasuk: jamSekarang,
+      jamPulang: null,
+      omset: null,
+      catatanOmset: ''
+    };
+
+    absensi.push(barusanAbsen);
+    saveData();
+    renderTodayAbsen();
+  }
+
+  function absenPulang() {
+    if (!userLocation.allowed) { alert("GPS di luar area."); return; }
+    const today = getTodayDateString();
+    const jamSekarang = document.getElementById('jam-live').value;
+
+    const index = absensi.findIndex(a => a.tanggal === today && a.userId === currentUser.id && !a.jamPulang);
+    if (index !== -1) {
+      absensi[index].jamPulang = jamSekarang;
+      saveData();
+      renderTodayAbsen();
+      showModal('Absen Pulang Berhasil', 'Absensi pulang tersimpan. Ingin langsung input omset?', () => showPage('omset'));
+    }
+  }
+
+  function calculateWorkDuration(start, end) {
+    const [sH, sM] = start.split(':').map(Number);
+    const [eH, eM] = end.split(':').map(Number);
+    let diff = (eH * 60 + eM) - (sH * 60 + sM);
+    if (diff < 0) diff += 24 * 60;
+    return `${Math.floor(diff / 60)}j ${diff % 60}m`;
+  }
+
+  function initOmsetPage() {
+    const today = getTodayDateString();
+    document.getElementById('omset-page-alert').innerHTML = '';
+
+    if (currentUser.role === 'admin') {
+      document.getElementById('omset-karyawan-section').classList.add('hidden');
+      document.getElementById('omset-admin-section').classList.remove('hidden');
+      document.getElementById('omset-admin-tgl').value = today;
+      loadOmsetAdmin();
+    } else {
+      document.getElementById('omset-karyawan-section').classList.remove('hidden');
+      document.getElementById('omset-admin-section').classList.add('hidden');
+      document.getElementById('omset-k-nama').value = currentUser.nama;
+      document.getElementById('omset-k-tgl').value = today;
+
+      const myAbsen = absensi.find(a => a.tanggal === today && a.userId === currentUser.id);
+      
+      if (!myAbsen) {
+        document.getElementById('omset-karyawan-form').classList.add('hidden');
+        document.getElementById('omset-karyawan-locked').classList.add('hidden');
+        document.getElementById('omset-page-alert').innerHTML = `<div class="alert alert-danger">⚠️ Anda belum melakukan <b>Absen Masuk</b> hari ini.</div>`;
+      } else if (myAbsen.omset !== null) {
+        document.getElementById('omset-karyawan-form').classList.add('hidden');
+        document.getElementById('omset-karyawan-locked').classList.remove('hidden');
+        document.getElementById('omset-k-locked-nilai').value = formatIDR(myAbsen.omset);
+        document.getElementById('omset-k-locked-catatan').value = myAbsen.catatanOmset || '-';
+      } else {
+        document.getElementById('omset-karyawan-form').classList.remove('hidden');
+        document.getElementById('omset-karyawan-locked').classList.add('hidden');
+        document.getElementById('omset-k-nilai').value = '';
+        document.getElementById('omset-k-catatan').value = '';
+      }
+    }
+  }
+
+  function submitOmsetKaryawan() {
+    const nilai = parseFloat(document.getElementById('omset-k-nilai').value);
+    const catatan = document.getElementById('omset-k-catatan').value.trim();
+    if (isNaN(nilai) || nilai < 0) { alert('Nominal tidak valid!'); return; }
+    showModal('Konfirmasi', 'Data omset akan dikunci. Lanjutkan?', () => {
+      const today = getTodayDateString();
+      const index = absensi.findIndex(a => a.tanggal === today && a.userId === currentUser.id);
+      if (index !== -1) { absensi[index].omset = nilai; absensi[index].catatanOmset = catatan; saveData(); initOmsetPage(); }
+    });
+  }
+
+  function loadOmsetAdmin() {
+    const tgl = document.getElementById('omset-admin-tgl').value;
+    const uid = document.getElementById('omset-admin-karyawan').value;
+    const formWrap = document.getElementById('omset-admin-form-wrap');
+    const emptyBox = document.getElementById('omset-admin-empty');
+    
+    formWrap.classList.add('hidden'); emptyBox.classList.add('hidden');
+
+    if (uid && tgl) {
+      const record = absensi.find(a => a.tanggal === tgl && a.userId === uid);
+      if (!record) {
+        emptyBox.classList.remove('hidden');
+      } else {
+        formWrap.classList.remove('hidden');
+        document.getElementById('omset-admin-title').innerText = `📝 Kelola Omset: ${record.namaKaryawan}`;
+        document.getElementById('omset-admin-nilai').value = record.omset !== null ? record.omset : '';
+        document.getElementById('omset-admin-catatan').value = record.catatanOmset || '';
+        const badge = document.getElementById('omset-admin-status-badge');
+        if (record.omset !== null) {
+          badge.className = "badge badge-done"; badge.innerText = "Sudah Diisi";
+          document.getElementById('btn-omset-admin-reset').classList.remove('hidden');
+        } else {
+          badge.className = "badge badge-pending"; badge.innerText = "Belum Mengisi";
+          document.getElementById('btn-omset-admin-reset').classList.add('hidden');
+        }
+      }
+    }
+    renderOmsetRekapTable(tgl);
+  }
+
+  function saveOmsetAdmin() {
+    const tgl = document.getElementById('omset-admin-tgl').value;
+    const uid = document.getElementById('omset-admin-karyawan').value;
+    const nilai = parseFloat(document.getElementById('omset-admin-nilai').value);
+    const catatan = document.getElementById('omset-admin-catatan').value.trim();
+    if (isNaN(nilai) || nilai < 0) { alert('Nominal invalid!'); return; }
+    const index = absensi.findIndex(a => a.tanggal === tgl && a.userId === uid);
+    if (index !== -1) { absensi[index].omset = nilai; absensi[index].catatanOmset = catatan; saveData(); loadOmsetAdmin(); }
+  }
+
+  function resetOmsetAdmin() {
+    const tgl = document.getElementById('omset-admin-tgl').value;
+    const uid = document.getElementById('omset-admin-karyawan').value;
+    showModal('Reset', 'Kosongkan omset?', () => {
+      const index = absensi.findIndex(a => a.tanggal === tgl && a.userId === uid);
+      if (index !== -1) { absensi[index].omset = null; absensi[index].catatanOmset = ''; saveData(); loadOmsetAdmin(); }
+    });
+  }
+
+  function renderOmsetRekapTable(targetDate) {
+    const tbody = document.getElementById('omset-rekap-table');
+    tbody.innerHTML = '';
+    const dayRecords = absensi.filter(a => a.tanggal === targetDate);
+    if(dayRecords.length === 0) return tbody.innerHTML = `<tr><td colspan="7" align="center">Kosong</td></tr>`;
+    dayRecords.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><b>${r.namaKaryawan}</b></td><td>${r.jamMasuk||'-'}</td><td>${r.jamPulang||'-'}</td>
+        <td><span style="color:#2e7d32;font-weight:600;">${r.omset!==null?formatIDR(r.omset):'-'}</span></td>
+        <td>${r.catatanOmset||'-'}</td><td>${r.omset!==null?'<span class="badge badge-done">Locked</span>':'<span class="badge badge-pending">Pending</span>'}</td>
+        <td><button class="btn-sm" onclick="quickEditOmsetAdmin('${r.userId}','${r.tanggal}')">Edit</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function quickEditOmsetAdmin(userId, tanggal) {
+    document.getElementById('omset-admin-karyawan').value = userId;
+    document.getElementById('omset-admin-tgl').value = tanggal;
+    loadOmsetAdmin();
+  }
+
+  function initLaporanPage() {
+    const today = getTodayDateString();
+    document.getElementById('filter-dari').value = today.substring(0, 8) + '01';
+    document.getElementById('filter-sampai').value = today;
+    document.getElementById('filter-nama').value = '';
+    renderLaporan();
+  }
+
+  function switchTab(tabType) {
+    currentReportTab = tabType;
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    renderLaporan();
+  }
+
+  function renderLaporan() {
+    const dari = document.getElementById('filter-dari').value;
+    const sampai = document.getElementById('filter-sampai').value;
+    const uid = document.getElementById('filter-nama').value;
+    const head = document.getElementById('laporan-head');
+    const body = document.getElementById('laporan-body');
+    const emptyMsg = document.getElementById('laporan-empty');
+    body.innerHTML = ''; emptyMsg.classList.add('hidden');
+
+    let filtered = absensi.filter(a => a.tanggal >= dari && a.tanggal <= sampai);
+    if (uid) filtered = filtered.filter(a => a.userId === uid);
+
+    gridRender(filtered);
+    if (filtered.length === 0) { head.innerHTML = ''; return emptyMsg.classList.remove('hidden'); }
+
+    if (currentReportTab === 'harian') {
+      head.innerHTML = `<tr><th>Tanggal</th><th>Nama</th><th>Masuk</th><th>Pulang</th><th>Durasi</th><th>Omset</th></tr>`;
+      filtered.sort((a,b) => b.tanggal.localeCompare(a.tanggal)).forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.tanggal}</td><td><b>${r.namaKaryawan}</b></td><td>${r.jamMasuk||'-'}</td><td>${r.jamPulang||'-'}</td>
+          <td>${r.jamMasuk&&r.jamPulang?calculateWorkDuration(r.jamMasuk,r.jamPulang):'-'}</td>
+          <td><b style="color:#1a73e8">${r.omset!==null?formatIDR(r.omset):'Rp 0'}</b></td>`;
+        body.appendChild(tr);
+      });
+    } else if (currentReportTab === 'karyawan') {
+      head.innerHTML = `<tr><th>Nama Karyawan</th><th>Total Hadir</th><th>Rata-rata Omset</th></tr>`;
+      let agg = {};
+      filtered.forEach(r => {
+        if (!agg[r.userId]) agg[r.userId] = { nama: r.namaKaryawan, count: 0, tOmset: 0, cOmset: 0 };
+        agg[r.userId].count++;
+        if (r.omset !== null) { agg[r.userId].tOmset += r.omset; agg[r.userId].cOmset++; }
+      });
+      Object.values(agg).forEach(v => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><b>${v.nama}</b></td><td><span class="badge badge-masuk">${v.count} Hari</span></td>
+          <td><span style="color:#34a853; font-weight:700;">${formatIDR(v.cOmset>0?v.tOmset/v.cOmset:0)}</span></td>`;
+        body.appendChild(tr);
+      });
+    } else if (currentReportTab === 'omset') {
+      head.innerHTML = `<tr><th>Tanggal</th><th>Karyawan</th><th>Total Omset</th></tr>`;
+      let aggDate = {};
+      filtered.forEach(r => {
+        if (!aggDate[r.tanggal]) aggDate[r.tanggal] = { tgl: r.tanggal, c: 0, omset: 0 };
+        aggDate[r.tanggal].c++;
+        if(r.omset !== null) aggDate[r.tanggal].omset += r.omset;
+      });
+      Object.values(aggDate).sort((a,b) => b.tgl.localeCompare(a.tgl)).forEach(v => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${v.tgl}</td><td>${v.c} Orang</td><td><b style="color:#2e7d32">${formatIDR(v.omset)}</b></td>`;
+        body.appendChild(tr);
+      });
+    }
+  }
+
+  function gridRender(dataList) {
+    const grid = document.getElementById('stats-grid');
+    const totalHari = new Set(dataList.map(d => d.tanggal)).size;
+    const grandTotal = dataList.reduce((acc, curr) => acc + (curr.omset || 0), 0);
+    grid.innerHTML = `
+      <div class="stat-card"><div class="val">${dataList.length}</div><div class="lbl">Total Absen</div></div>
+      <div class="stat-card"><div class="val" style="color:#34a853;">${formatIDR(grandTotal)}</div><div class="lbl">Total Omset</div></div>
+      <div class="stat-card"><div class="val" style="color:#f9ab00;">${totalHari}</div><div class="lbl">Hari Aktif</div></div>
+    `;
+  }
+
+  function renderKaryawanTable() {
+    const tbody = document.getElementById('karyawan-table');
+    tbody.innerHTML = '';
+    users.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><b>${u.nama}</b></td><td><code>${u.user}</code></td>
+        <td><span class="badge ${u.role==='admin'?'badge-locked':'badge-masuk'}">${u.role.toUpperCase()}</span></td>
+        <td><button class="btn-sm-danger" onclick="hapusKaryawan('${u.id}')" ${u.id==='u1'?'disabled':''}>Hapus</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function tambahKaryawan() {
+    const nama = document.getElementById('new-nama').value.trim();
+    const user = document.getElementById('new-user').value.trim().toLowerCase();
+    const pass = document.getElementById('new-pass').value.trim();
+    const role = document.getElementById('new-role').value;
+    if (!nama || !user || !pass) return alert('Lengkapi data!');
+    if (users.some(u => u.user === user)) return alert('Username sudah terpakai!');
+    users.push({ id: 'u-' + Date.now(), nama, user, pass, role });
+    localStorage.setItem('users', JSON.stringify(users));
+    document.getElementById('new-nama').value = ''; document.getElementById('new-user').value = ''; document.getElementById('new-pass').value = '';
+    renderKaryawanTable(); populateDropdowns(); alert('Sukses tambah karyawan.');
+  }
+
+  function hapusKaryawan(id) {
+    showModal('Hapus', 'Yakin hapus akun?', () => {
+      users = users.filter(u => u.id !== id);
+      localStorage.setItem('users', JSON.stringify(users));
+      renderKaryawanTable(); populateDropdowns();
+    });
+  }
+
+  function resetSemuaData() {
+    showModal('RESET DATA', 'Hapus semua data absensi & omset? (Tidak bisa dikembalikan)', () => {
+      absensi = []; localStorage.setItem('absensi', JSON.stringify([]));
+      alert('Data dibersihkan.'); if(currentUser.role === 'admin') showPage('admin');
+    });
+  }
+
+  function populateDropdowns() {
+    const selectAdmin = document.getElementById('omset-admin-karyawan');
+    const selectFilter = document.getElementById('filter-nama');
+    selectAdmin.innerHTML = '<option value="">— Pilih Karyawan —</option>';
+    selectFilter.innerHTML = '<option value="">Semua Karyawan</option>';
+    users.forEach(u => {
+      const opt = `<option value="${u.id}">${u.nama} (${u.user})</option>`;
+      selectFilter.innerHTML += opt;
+      if (u.role === 'karyawan') selectAdmin.innerHTML += opt;
+    });
+  }
+
+  function showModal(title, msg, onConfirm) {
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-msg').innerText = msg;
+    document.getElementById('modal-overlay').classList.remove('hidden');
+    modalAction = onConfirm;
+    document.getElementById('modal-confirm-btn').onclick = function() { if(modalAction) modalAction(); closeModal(); };
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.add('hidden'); modalAction = null;
+  }
+
+  function saveData() { localStorage.setItem('absensi', JSON.stringify(absensi)); }
+  function exportCSV() { alert("Fitur Export CSV tersedia di laporan."); }
+</script>
+</body>
+</html>

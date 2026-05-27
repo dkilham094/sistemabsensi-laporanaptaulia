@@ -611,12 +611,12 @@
       (position) => {
         userLocation.lat = position.coords.latitude;
         userLocation.lon = position.coords.longitude;
-        userLocation.allowed = true; // Demo mode always allowed
-        setGPSState('allowed', `Demo Mode: Akses Lokasi Diizinkan`);
+        userLocation.allowed = true;
+        setGPSState('allowed');
       },
       (error) => {
         userLocation.allowed = true; 
-        setGPSState('denied', 'GPS Mati/Akses Ditolak. (Demo Mode: Tetap Mengizinkan Absen)');
+        setGPSState('denied', 'GPS Mati/Akses Ditolak.');
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Absensi Apotek - Fitur Selfie & GPS</title>
+  <title>Absensi Apotek - Fitur Shift & Gaji Lengkap</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; }
@@ -178,7 +178,7 @@
     <h1>💊 Apotek Aulia</h1>
     <div class="nav-links">
       <button id="nav-absen" class="active" onclick="showPage('absen')">Absen</button>
-      <button id="nav-omset" onclick="showPage('omset')">Omset</button>
+      <button id="nav-omset" onclick="showPage('omset')">Penjualan</button>
       <button id="nav-laporan" onclick="showPage('laporan')">Laporan</button>
       <button id="nav-admin" class="hidden" onclick="showPage('admin')">Admin</button>
       <button onclick="doLogout()">Keluar</button>
@@ -199,6 +199,15 @@
           <div class="form-group"><label>Karyawan</label><input type="text" id="nama-display" readonly/></div>
           <div class="form-group"><label>Tanggal</label><input type="text" id="tgl-display" readonly/></div>
         </div>
+        
+        <div class="form-group">
+          <label>Shift Kerja</label>
+          <select id="shift-select">
+            <option value="pagi">Pagi (Masuk 08:40 - Pulang 15:30)</option>
+            <option value="siang">Siang (Masuk 12:40 - Pulang 20:30)</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label>Jam Sekarang</label>
           <input type="text" id="jam-live" readonly style="font-weight:700;color:#1a73e8;font-size:1.1rem;"/>
@@ -216,7 +225,7 @@
           <table>
             <thead>
               <tr>
-                <th>Karyawan</th><th>Bukti Foto</th><th>Jam Masuk</th><th>Jam Pulang</th><th>Omset</th><th>Status</th>
+                <th>Karyawan</th><th>Shift</th><th>Bukti Foto</th><th>Jam Masuk</th><th>Jam Pulang</th><th>Laba Penjualan</th><th>Status</th>
               </tr>
             </thead>
             <tbody id="today-table"></tbody>
@@ -227,35 +236,35 @@
 
     <div id="page-omset" class="hidden">
       <div class="card">
-        <h2>💰 Submit Omset</h2>
+        <h2>💰 Submit Laba Penjualan</h2>
         <div id="omset-page-alert"></div>
 
         <div id="omset-karyawan-section">
-          <div class="alert alert-info">Submit omset penjualan Anda hari ini. <strong>Setelah submit, data terkunci.</strong></div>
+          <div class="alert alert-info">Submit laba penjualan Anda hari ini. <strong>Setelah submit, data terkunci.</strong></div>
           <div id="omset-karyawan-form">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
               <div class="form-group"><label>Nama</label><input type="text" id="omset-k-nama" readonly/></div>
               <div class="form-group"><label>Tanggal</label><input type="text" id="omset-k-tgl" readonly/></div>
             </div>
-            <div class="form-group"><label>Total Omset (Rp)</label><input type="number" id="omset-k-nilai" min="0"/></div>
+            <div class="form-group"><label>Total Laba Penjualan (Rp)</label><input type="number" id="omset-k-nilai" min="0"/></div>
             <div class="form-group"><label>Catatan</label><input type="text" id="omset-k-catatan"/></div>
-            <button class="btn btn-success" onclick="submitOmsetKaryawan()">💾 Submit Omset</button>
+            <button class="btn btn-success" onclick="submitOmsetKaryawan()">💾 Submit Laba</button>
           </div>
 
           <div id="omset-karyawan-locked" class="hidden">
             <div class="omset-card submitted">
-              <div class="omset-header"><h3>✅ Omset Hari Ini Sudah Disubmit</h3></div>
+              <div class="omset-header"><h3>✅ Laba Hari Ini Sudah Disubmit</h3></div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div class="form-group"><label>Total Omset</label><input type="text" id="omset-k-locked-nilai" readonly/></div>
+                <div class="form-group"><label>Total Laba</label><input type="text" id="omset-k-locked-nilai" readonly/></div>
                 <div class="form-group"><label>Catatan</label><input type="text" id="omset-k-locked-catatan" readonly/></div>
               </div>
-              <div class="lock-info success">🔒 Data omset telah terkunci. Hubungi admin jika ada kesalahan.</div>
+              <div class="lock-info success">🔒 Data laba telah terkunci. Hubungi admin jika ada kesalahan.</div>
             </div>
           </div>
         </div>
 
         <div id="omset-admin-section" class="hidden">
-          <div class="alert alert-info">Admin dapat submit dan mengedit omset karyawan kapan saja.</div>
+          <div class="alert alert-info">Admin dapat submit dan mengedit Laba karyawan kapan saja.</div>
           <div class="filter-row" style="margin-bottom:16px;">
             <div style="flex:1;"><label>Tanggal</label><input type="date" id="omset-admin-tgl"/></div>
             <div style="flex:1;"><label>Karyawan</label><select id="omset-admin-karyawan"><option value="">— Pilih —</option></select></div>
@@ -263,13 +272,13 @@
           </div>
           <div id="omset-admin-form-wrap" class="hidden">
             <div class="omset-card">
-              <div class="omset-header"><h3 id="omset-admin-title">📝 Input Omset</h3><span id="omset-admin-status-badge"></span></div>
+              <div class="omset-header"><h3 id="omset-admin-title">📝 Input Laba</h3><span id="omset-admin-status-badge"></span></div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div class="form-group"><label>Total Omset (Rp)</label><input type="number" id="omset-admin-nilai" min="0"/></div>
+                <div class="form-group"><label>Total Laba Penjualan (Rp)</label><input type="number" id="omset-admin-nilai" min="0"/></div>
                 <div class="form-group"><label>Catatan</label><input type="text" id="omset-admin-catatan"/></div>
               </div>
               <div style="display:flex;gap:10px;">
-                <button class="btn-sm-success" onclick="saveOmsetAdmin()">💾 Simpan Omset</button>
+                <button class="btn-sm-success" onclick="saveOmsetAdmin()">💾 Simpan Laba</button>
                 <button class="btn-sm-danger hidden" id="btn-omset-admin-reset" onclick="resetOmsetAdmin()">🔄 Reset</button>
               </div>
             </div>
@@ -282,10 +291,10 @@
     <div id="page-laporan" class="hidden">
       <div class="stats-grid" id="stats-grid"></div>
       <div class="card">
-        <h2>📊 Laporan Absensi &amp; Omset</h2>
+        <h2>📊 Laporan Absensi &amp; Gaji</h2>
         <div class="tab-btns">
           <button class="tab-btn active" onclick="switchTab('harian')">Harian</button>
-          <button class="tab-btn" onclick="switchTab('karyawan')">Per Karyawan</button>
+          <button class="tab-btn" onclick="switchTab('karyawan')">Per Karyawan (Gaji)</button>
         </div>
         <div class="filter-row">
           <input type="date" id="filter-dari"/><span style="color:#777;">s/d</span><input type="date" id="filter-sampai"/>
@@ -385,10 +394,14 @@
   let currentSelfieBase64 = null;
   let pendingAbsenType = null;
 
-  // --- KONFIGURASI KOORDINAT APOTEK ---
-  const APOTEK_LAT = -7.720019; // Ganti dengan Latitude Apotek
-  const APOTEK_LNG = 110.7057736; // Ganti dengan Longitude Apotek
-  const MAX_RADIUS_METERS = 100; // Batas maksimal jarak absen dalam meter
+  // --- KONFIGURASI KOORDINAT APOTEK & KOMPONEN GAJI ---
+  const APOTEK_LAT = -6.200000; // [PENTING] Ganti dengan Latitude Apotek
+  const APOTEK_LNG = 106.816666; // [PENTING] Ganti dengan Longitude Apotek
+  const MAX_RADIUS_METERS = 50; // Batas maksimal jarak absen dalam meter
+
+  const GAJI_POKOK = 350000;
+  const TUNJANGAN_KEHADIRAN = 400000;
+  const DENDA_TELAT = 25000;
 
   window.onload = function() {
     initLiveClock();
@@ -421,11 +434,23 @@
     return 'Rp ' + parseInt(angka).toLocaleString('id-ID');
   }
 
+  // --- FUNGSI PENGHITUNG KETERLAMBATAN (PER KALI/KEJADIAN) ---
+  function hitungTelatKali(jamMasuk, shift) {
+    if (!jamMasuk) return 0;
+    
+    // Tentukan batas waktu berdasarkan shift yang dipilih
+    let batasMasuk = "08:40:00"; 
+    if (shift === 'pagi') batasMasuk = "08:40:00";
+    else if (shift === 'siang') batasMasuk = "12:40:00";
+
+    // Jika melebihi batas jam masuk, dihitung 1 kali telat
+    return jamMasuk > batasMasuk ? 1 : 0;
+  }
+
   // --- FUNGSI GPS DAN VALIDASI LOKASI ---
   function checkGPSLocation() {
     if (!navigator.geolocation) return setGPSState('denied', 'GPS tidak didukung oleh browser ini.');
     
-    // Minta akurasi tinggi untuk lokasi
     navigator.geolocation.getCurrentPosition(
       (pos) => { 
         const lat = pos.coords.latitude;
@@ -437,16 +462,16 @@
           setGPSState('allowed', `Lokasi Sesuai (Jarak: ${Math.round(distance)}m)`);
         } else {
           userLocation.allowed = false; 
-          setGPSState('denied', `Di luar area. Jarak Anda: ${Math.round(distance)}m (Batas: 100m)`);
+          setGPSState('denied', `Di luar area. Jarak: ${Math.round(distance)}m (Batas: 100m)`);
           nonaktifkanTombolAbsen();
         }
       },
       (err) => { 
         userLocation.allowed = false; 
-        setGPSState('denied', 'Akses Lokasi Ditolak atau Gagal. Pastikan GPS menyala.'); 
+        setGPSState('denied', 'Akses Lokasi Ditolak/Gagal. Nyalakan GPS.'); 
         nonaktifkanTombolAbsen();
       },
-      { enableHighAccuracy: true } // Memaksa device mencari lokasi paling presisi
+      { enableHighAccuracy: true } 
     );
   }
 
@@ -464,9 +489,8 @@
     if (btnPulang) btnPulang.disabled = true;
   }
 
-  // Rumus Haversine untuk menghitung jarak
   function hitungJarakMeters(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Radius bumi dalam meter
+    const R = 6371e3; 
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -604,19 +628,24 @@
     const btnMasuk = document.getElementById('btn-masuk');
     const btnPulang = document.getElementById('btn-pulang');
     const alertBox = document.getElementById('absen-alert');
+    const shiftSelect = document.getElementById('shift-select');
     alertBox.innerHTML = '';
 
     if (!myAbsen) {
       btnMasuk.disabled = !userLocation.allowed; btnPulang.disabled = true;
+      shiftSelect.disabled = false;
     } else if (myAbsen && !myAbsen.jamPulang) {
       btnMasuk.disabled = true; btnPulang.disabled = !userLocation.allowed;
-      alertBox.innerHTML = `<div class="alert alert-info">Absen masuk berhasil jam <b>${myAbsen.jamMasuk}</b>.</div>`;
+      shiftSelect.value = myAbsen.shift || 'pagi';
+      shiftSelect.disabled = true;
+      alertBox.innerHTML = `<div class="alert alert-info">Absen masuk berhasil jam <b>${myAbsen.jamMasuk}</b> (Shift ${myAbsen.shift ? myAbsen.shift.toUpperCase() : '-'}).</div>`;
     } else {
       btnMasuk.disabled = true; btnPulang.disabled = true;
+      shiftSelect.disabled = true;
       alertBox.innerHTML = `<div class="alert alert-success">Selesai! Absen masuk & pulang hari ini lengkap.</div>`;
     }
 
-    if (todayData.length === 0) return tbody.innerHTML = `<tr><td colspan="6" align="center">Kosong</td></tr>`;
+    if (todayData.length === 0) return tbody.innerHTML = `<tr><td colspan="7" align="center">Kosong</td></tr>`;
 
     todayData.forEach(item => {
       let photosHTML = '';
@@ -624,9 +653,12 @@
       if (item.fotoPulang) photosHTML += `<img src="${item.fotoPulang}" class="photo-thumb" title="Selfie Pulang" style="border-color:#34a853;"/>`;
       
       const statusBadge = item.jamPulang ? `<span class="badge badge-done">Selesai</span>` : `<span class="badge badge-masuk">Aktif</span>`;
+      const txtShift = item.shift ? item.shift.toUpperCase() : '-';
+      
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><b>${item.namaKaryawan}</b></td>
+        <td><span class="badge" style="background:#e8f0fe; color:#1a73e8">${txtShift}</span></td>
         <td><div class="photo-cell">${photosHTML || '-'}</div></td>
         <td>${item.jamMasuk || '-'}</td>
         <td>${item.jamPulang || '-'}</td>
@@ -639,10 +671,13 @@
 
   function executeAbsenMasuk(photoData) {
     const today = getTodayDateString();
+    const selectedShift = document.getElementById('shift-select').value;
+    
     absensi.push({
       id: 'abs-' + Date.now(),
       userId: currentUser.id, namaKaryawan: currentUser.nama,
       tanggal: today, jamMasuk: document.getElementById('jam-live').value, jamPulang: null,
+      shift: selectedShift, // Simpan shift yang dipilih
       fotoMasuk: photoData, fotoPulang: null,
       omset: null, catatanOmset: ''
     });
@@ -656,11 +691,11 @@
       absensi[idx].jamPulang = document.getElementById('jam-live').value;
       absensi[idx].fotoPulang = photoData;
       saveData(); renderTodayAbsen();
-      showModal('Berhasil', 'Absen pulang tersimpan. Input omset sekarang?', () => showPage('omset'));
+      showModal('Berhasil', 'Absen pulang tersimpan. Input laba penjualan sekarang?', () => showPage('omset'));
     }
   }
 
-  // --- OMSET & LAPORAN ---
+  // --- LABA PENJUALAN (OMSET) & LAPORAN ---
   function initOmsetPage() {
     const today = getTodayDateString(); document.getElementById('omset-page-alert').innerHTML = '';
     if (currentUser.role === 'admin') {
@@ -688,7 +723,7 @@
   function submitOmsetKaryawan() {
     const nilai = parseFloat(document.getElementById('omset-k-nilai').value);
     if (isNaN(nilai) || nilai < 0) return alert('Nominal invalid!');
-    showModal('Konfirmasi', 'Kunci data omset?', () => {
+    showModal('Konfirmasi', 'Kunci data laba penjualan?', () => {
       const idx = absensi.findIndex(a => a.tanggal === getTodayDateString() && a.userId === currentUser.id);
       if (idx !== -1) { absensi[idx].omset = nilai; absensi[idx].catatanOmset = document.getElementById('omset-k-catatan').value; saveData(); initOmsetPage(); }
     });
@@ -725,26 +760,64 @@
 
     document.getElementById('stats-grid').innerHTML = `
       <div class="stat-card"><div class="val">${filtered.length}</div><div class="lbl">Total Kehadiran</div></div>
-      <div class="stat-card"><div class="val" style="color:#34a853;">${formatIDR(filtered.reduce((a,c)=>a+(c.omset||0),0))}</div><div class="lbl">Total Omset</div></div>
+      <div class="stat-card"><div class="val" style="color:#34a853;">${formatIDR(filtered.reduce((a,c)=>a+(c.omset||0),0))}</div><div class="lbl">Total Laba</div></div>
     `;
 
     if (currentReportTab === 'harian') {
-      head.innerHTML = `<tr><th>Tanggal</th><th>Nama</th><th>Bukti Selfie</th><th>Jam Masuk</th><th>Jam Pulang</th><th>Omset</th></tr>`;
+      head.innerHTML = `<tr><th>Tanggal</th><th>Nama</th><th>Shift</th><th>Bukti Selfie</th><th>Jam Masuk</th><th>Jam Pulang</th><th>Laba</th></tr>`;
       filtered.sort((a,b) => b.tanggal.localeCompare(a.tanggal)).forEach(r => {
         let photos = '';
         if(r.fotoMasuk) photos += `<img src="${r.fotoMasuk}" class="photo-thumb"/>`;
         if(r.fotoPulang) photos += `<img src="${r.fotoPulang}" class="photo-thumb"/>`;
+        const txtShift = r.shift ? r.shift.toUpperCase() : '-';
+        
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${r.tanggal}</td><td><b>${r.namaKaryawan}</b></td><td><div class="photo-cell">${photos||'-'}</div></td><td>${r.jamMasuk||'-'}</td><td>${r.jamPulang||'-'}</td><td><b style="color:#1a73e8">${r.omset!==null?formatIDR(r.omset):'-'}</b></td>`;
+        tr.innerHTML = `
+          <td>${r.tanggal}</td>
+          <td><b>${r.namaKaryawan}</b></td>
+          <td>${txtShift}</td>
+          <td><div class="photo-cell">${photos||'-'}</div></td>
+          <td>${r.jamMasuk||'-'}</td>
+          <td>${r.jamPulang||'-'}</td>
+          <td><b style="color:#1a73e8">${r.omset!==null?formatIDR(r.omset):'-'}</b></td>`;
         body.appendChild(tr);
       });
     } else {
-      head.innerHTML = `<tr><th>Nama Karyawan</th><th>Total Hadir</th></tr>`;
+      // TAB PER KARYAWAN (Fitur Gaji & Keterlambatan Per Kali)
+      head.innerHTML = `<tr><th>Nama Karyawan</th><th>Hadir</th><th>Telat</th><th>Total Laba</th><th>Gaji Bersih</th></tr>`;
       let agg = {};
-      filtered.forEach(r => { if (!agg[r.userId]) agg[r.userId] = { nama: r.namaKaryawan, count: 0 }; agg[r.userId].count++; });
+      
+      // Kumpulkan dan akumulasi data per karyawan
+      filtered.forEach(r => { 
+        if (!agg[r.userId]) {
+          agg[r.userId] = { nama: r.namaKaryawan, count: 0, omset: 0, telat: 0 }; 
+        }
+        agg[r.userId].count++; 
+        agg[r.userId].omset += (r.omset || 0); 
+        agg[r.userId].telat += hitungTelatKali(r.jamMasuk, r.shift); 
+      });
+      
+      // Tampilkan ke tabel dan hitung gaji bersih
       Object.values(agg).forEach(v => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><b>${v.nama}</b></td><td>${v.count} Hari</td>`;
+        
+        const komisi = v.omset * 0.25; 
+        const totalDendaTelat = v.telat * DENDA_TELAT;
+        
+        // Rumus: GP + Tunj. Hadir + Komisi 25% Laba - (Telat x Denda)
+        let totalGaji = GAJI_POKOK + TUNJANGAN_KEHADIRAN + komisi - totalDendaTelat;
+        if (totalGaji < 0) totalGaji = 0; // Menghindari nilai gaji minus
+        
+        tr.innerHTML = `
+          <td><b>${v.nama}</b></td>
+          <td>${v.count} Hari</td>
+          <td style="color:#c62828; font-weight:bold;">${v.telat > 0 ? v.telat + ' Kali' : '-'}</td>
+          <td>${formatIDR(v.omset)}</td>
+          <td>
+            <b style="color:#34a853; font-size:1.05rem;">${formatIDR(totalGaji)}</b><br/>
+            <span style="font-size:0.75rem; color:#777;">(-Rp ${totalDendaTelat.toLocaleString('id-ID')} Telat)</span>
+          </td>
+        `;
         body.appendChild(tr);
       });
     }
@@ -758,14 +831,12 @@
       return;
     }
 
-    // Ambil struktur HTML dari tabel, lalu bersihkan tag gambar agar sel Excel tetap rapi
     let tableHTML = table.outerHTML;
-    tableHTML = tableHTML.replace(/<img[^>]*>/gi, "[FOTO]"); // Mengganti tag <img> dengan teks [FOTO]
+    tableHTML = tableHTML.replace(/<img[^>]*>/gi, "[FOTO]"); 
     
-    const filename = 'Laporan_Absensi_Omset_' + getTodayDateString() + '.xls';
+    const filename = 'Laporan_Absensi_Gaji_' + getTodayDateString() + '.xls';
     const dataType = 'application/vnd.ms-excel';
     
-    // Header uFEFF untuk memastikan encoding karakter UTF-8 terbaca sempurna oleh Excel
     const dataUri = 'data:' + dataType + ';charset=utf-8,' + encodeURIComponent('\uFEFF' + tableHTML);
 
     const downloadLink = document.createElement("a");
@@ -803,7 +874,7 @@
   }
   
   function resetSemuaData() { 
-    showModal('RESET DATA', 'Hapus semua data absensi (termasuk foto) & omset?', () => { 
+    showModal('RESET DATA', 'Hapus semua data absensi (termasuk foto) & laba?', () => { 
       absensi = []; 
       localStorage.setItem('absensi', JSON.stringify([])); 
       alert('Selesai.'); 

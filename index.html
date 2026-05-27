@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Absensi Apotek - Fitur Selfie</title>
+  <title>Absensi Apotek - Fitur Selfie & GPS</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; }
@@ -383,7 +383,12 @@
   // -- Variabel Kamera Selfie
   let cameraStream = null;
   let currentSelfieBase64 = null;
-  let pendingAbsenType = null; // 'masuk' atau 'pulang'
+  let pendingAbsenType = null;
+
+  // --- KONFIGURASI KOORDINAT APOTEK ---
+  const APOTEK_LAT = -7.720019; // Ganti dengan Latitude Apotek
+  const APOTEK_LNG = 110.7057736; // Ganti dengan Longitude Apotek
+  const MAX_RADIUS_METERS = 100; // Batas maksimal jarak absen dalam meter
 
   window.onload = function() {
     initLiveClock();
@@ -405,25 +410,73 @@
       if (el) el.value = timeStr;
     }, 1000);
   }
+  
   function getTodayDateString() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
+  
   function formatIDR(angka) {
     if (angka === null || isNaN(angka)) return 'Rp 0';
     return 'Rp ' + parseInt(angka).toLocaleString('id-ID');
   }
 
+  // --- FUNGSI GPS DAN VALIDASI LOKASI ---
   function checkGPSLocation() {
-    if (!navigator.geolocation) return setGPSState('denied', 'GPS tidak didukung.');
+    if (!navigator.geolocation) return setGPSState('denied', 'GPS tidak didukung oleh browser ini.');
+    
+    // Minta akurasi tinggi untuk lokasi
     navigator.geolocation.getCurrentPosition(
-      (pos) => { userLocation.allowed = true; setGPSState('allowed', `Akses Lokasi Diizinkan`); },
-      (err) => { userLocation.allowed = true; setGPSState('denied', 'Demo Mode: Tetap Mengizinkan Absen'); }
+      (pos) => { 
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const distance = hitungJarakMeters(APOTEK_LAT, APOTEK_LNG, lat, lng);
+
+        if (distance <= MAX_RADIUS_METERS) {
+          userLocation.allowed = true; 
+          setGPSState('allowed', `Lokasi Sesuai (Jarak: ${Math.round(distance)}m)`);
+        } else {
+          userLocation.allowed = false; 
+          setGPSState('denied', `Di luar area. Jarak Anda: ${Math.round(distance)}m (Batas: 100m)`);
+          nonaktifkanTombolAbsen();
+        }
+      },
+      (err) => { 
+        userLocation.allowed = false; 
+        setGPSState('denied', 'Akses Lokasi Ditolak atau Gagal. Pastikan GPS menyala.'); 
+        nonaktifkanTombolAbsen();
+      },
+      { enableHighAccuracy: true } // Memaksa device mencari lokasi paling presisi
     );
   }
+
   function setGPSState(state, msg) {
-    const box = document.getElementById('gps-box'); const m = document.getElementById('gps-msg');
-    if(box) box.className = `gps-status ${state}`; if(m) m.innerText = msg;
+    const box = document.getElementById('gps-box'); 
+    const m = document.getElementById('gps-msg');
+    if(box) box.className = `gps-status ${state}`; 
+    if(m) m.innerText = msg;
+  }
+
+  function nonaktifkanTombolAbsen() {
+    const btnMasuk = document.getElementById('btn-masuk');
+    const btnPulang = document.getElementById('btn-pulang');
+    if (btnMasuk) btnMasuk.disabled = true;
+    if (btnPulang) btnPulang.disabled = true;
+  }
+
+  // Rumus Haversine untuk menghitung jarak
+  function hitungJarakMeters(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Radius bumi dalam meter
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   }
 
   // --- LOGIN/LOGOUT ---
@@ -479,7 +532,6 @@
     document.getElementById('btn-cam-retake').classList.add('hidden');
     document.getElementById('btn-cam-confirm').classList.add('hidden');
 
-    // Minta akses kamera depan (facingMode: user)
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
       .then(stream => {
         cameraStream = stream;
@@ -496,23 +548,17 @@
     const canvas = document.getElementById('camera-canvas');
     const context = canvas.getContext('2d');
     
-    // Set resolusi canvas sesuai video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    
-    // Gambar frame video ke canvas
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Konversi gambar ke format Base64 (kualitas 0.6 untuk menghemat LocalStorage)
     currentSelfieBase64 = canvas.toDataURL('image/jpeg', 0.6);
     
-    // Sembunyikan video, tampilkan preview gambar
     video.classList.add('hidden');
     const preview = document.getElementById('camera-preview');
     preview.src = currentSelfieBase64;
     preview.classList.remove('hidden');
 
-    // Ganti tombol
     document.getElementById('btn-cam-capture').classList.add('hidden');
     document.getElementById('btn-cam-retake').classList.remove('hidden');
     document.getElementById('btn-cam-confirm').classList.remove('hidden');
@@ -573,7 +619,6 @@
     if (todayData.length === 0) return tbody.innerHTML = `<tr><td colspan="6" align="center">Kosong</td></tr>`;
 
     todayData.forEach(item => {
-      // Tampilkan foto masuk, jika ada foto pulang tampilkan keduanya
       let photosHTML = '';
       if (item.fotoMasuk) photosHTML += `<img src="${item.fotoMasuk}" class="photo-thumb" title="Selfie Masuk"/>`;
       if (item.fotoPulang) photosHTML += `<img src="${item.fotoPulang}" class="photo-thumb" title="Selfie Pulang" style="border-color:#34a853;"/>`;
@@ -598,7 +643,7 @@
       id: 'abs-' + Date.now(),
       userId: currentUser.id, namaKaryawan: currentUser.nama,
       tanggal: today, jamMasuk: document.getElementById('jam-live').value, jamPulang: null,
-      fotoMasuk: photoData, fotoPulang: null, // Properti baru untuk simpan Base64
+      fotoMasuk: photoData, fotoPulang: null,
       omset: null, catatanOmset: ''
     });
     saveData(); renderTodayAbsen();
@@ -609,7 +654,7 @@
     const idx = absensi.findIndex(a => a.tanggal === today && a.userId === currentUser.id && !a.jamPulang);
     if (idx !== -1) {
       absensi[idx].jamPulang = document.getElementById('jam-live').value;
-      absensi[idx].fotoPulang = photoData; // Simpan foto pulang
+      absensi[idx].fotoPulang = photoData;
       saveData(); renderTodayAbsen();
       showModal('Berhasil', 'Absen pulang tersimpan. Input omset sekarang?', () => showPage('omset'));
     }
@@ -649,8 +694,8 @@
     });
   }
 
-  function loadOmsetAdmin() { /* Disederhanakan untuk ruang kode, logika ada di versi lengkap sebelumnya jika diperlukan */ }
-  function saveOmsetAdmin() { /* ... */ }
+  function loadOmsetAdmin() {}
+  function saveOmsetAdmin() {}
 
   function initLaporanPage() {
     const today = getTodayDateString();
@@ -659,13 +704,20 @@
     document.getElementById('filter-nama').value = '';
     renderLaporan();
   }
-  function switchTab(t) { currentReportTab = t; document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); event.target.classList.add('active'); renderLaporan(); }
+  
+  function switchTab(t) { 
+    currentReportTab = t; 
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); 
+    event.target.classList.add('active'); 
+    renderLaporan(); 
+  }
 
   function renderLaporan() {
     const dari = document.getElementById('filter-dari').value;
     const sampai = document.getElementById('filter-sampai').value;
     const uid = document.getElementById('filter-nama').value;
-    const head = document.getElementById('laporan-head'); const body = document.getElementById('laporan-body');
+    const head = document.getElementById('laporan-head'); 
+    const body = document.getElementById('laporan-body');
     body.innerHTML = '';
     
     let filtered = absensi.filter(a => a.tanggal >= dari && a.tanggal <= sampai);
@@ -698,6 +750,32 @@
     }
   }
 
+  // --- FUNGSI EKSPOR EXCEL ---
+  function exportToExcel() {
+    const table = document.getElementById("laporan-table");
+    if (!table) {
+      alert("Tabel laporan tidak ditemukan.");
+      return;
+    }
+
+    // Ambil struktur HTML dari tabel, lalu bersihkan tag gambar agar sel Excel tetap rapi
+    let tableHTML = table.outerHTML;
+    tableHTML = tableHTML.replace(/<img[^>]*>/gi, "[FOTO]"); // Mengganti tag <img> dengan teks [FOTO]
+    
+    const filename = 'Laporan_Absensi_Omset_' + getTodayDateString() + '.xls';
+    const dataType = 'application/vnd.ms-excel';
+    
+    // Header uFEFF untuk memastikan encoding karakter UTF-8 terbaca sempurna oleh Excel
+    const dataUri = 'data:' + dataType + ';charset=utf-8,' + encodeURIComponent('\uFEFF' + tableHTML);
+
+    const downloadLink = document.createElement("a");
+    document.body.appendChild(downloadLink);
+    downloadLink.href = dataUri;
+    downloadLink.download = filename;
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  }
+
   // --- UTILS ---
   function renderKaryawanTable() {
     const tbody = document.getElementById('karyawan-table'); tbody.innerHTML = '';
@@ -708,14 +786,31 @@
       tbody.appendChild(tr);
     });
   }
+  
   function tambahKaryawan() {
     const n = document.getElementById('new-nama').value, u = document.getElementById('new-user').value, p = document.getElementById('new-pass').value;
     if (!n || !u || !p) return alert('Lengkapi data!'); if (users.some(x => x.user === u)) return alert('Username terpakai!');
     users.push({ id: 'u-' + Date.now(), nama: n, user: u, pass: p, role: document.getElementById('new-role').value });
     localStorage.setItem('users', JSON.stringify(users)); renderKaryawanTable(); populateDropdowns(); alert('Sukses.');
   }
-  function hapusKaryawan(id) { showModal('Hapus', 'Yakin hapus?', () => { users = users.filter(u => u.id !== id); localStorage.setItem('users', JSON.stringify(users)); renderKaryawanTable(); populateDropdowns(); }); }
-  function resetSemuaData() { showModal('RESET DATA', 'Hapus semua data absensi (termasuk foto) & omset?', () => { absensi = []; localStorage.setItem('absensi', JSON.stringify([])); alert('Selesai.'); if(currentUser.role === 'admin') showPage('admin'); }); }
+  
+  function hapusKaryawan(id) { 
+    showModal('Hapus', 'Yakin hapus?', () => { 
+      users = users.filter(u => u.id !== id); 
+      localStorage.setItem('users', JSON.stringify(users)); 
+      renderKaryawanTable(); populateDropdowns(); 
+    }); 
+  }
+  
+  function resetSemuaData() { 
+    showModal('RESET DATA', 'Hapus semua data absensi (termasuk foto) & omset?', () => { 
+      absensi = []; 
+      localStorage.setItem('absensi', JSON.stringify([])); 
+      alert('Selesai.'); 
+      if(currentUser.role === 'admin') showPage('admin'); 
+    }); 
+  }
+  
   function populateDropdowns() {
     const s1 = document.getElementById('omset-admin-karyawan'), s2 = document.getElementById('filter-nama');
     if(s1) s1.innerHTML = '<option value="">— Pilih Karyawan —</option>';
@@ -725,13 +820,20 @@
       if(s2) s2.innerHTML += opt; if (u.role === 'karyawan' && s1) s1.innerHTML += opt;
     });
   }
+  
   function showModal(title, msg, onConfirm) {
     document.getElementById('modal-title').innerText = title; document.getElementById('modal-msg').innerText = msg;
     document.getElementById('modal-overlay').classList.remove('hidden'); modalAction = onConfirm;
     document.getElementById('modal-confirm-btn').onclick = function() { if(modalAction) modalAction(); closeModal(); };
   }
-  function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); modalAction = null; }
-  function saveData() { localStorage.setItem('absensi', JSON.stringify(absensi)); }
+  
+  function closeModal() { 
+    document.getElementById('modal-overlay').classList.add('hidden'); modalAction = null; 
+  }
+  
+  function saveData() { 
+    localStorage.setItem('absensi', JSON.stringify(absensi)); 
+  }
 </script>
 </body>
 </html>

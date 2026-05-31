@@ -203,8 +203,8 @@
         <div class="form-group">
           <label>Shift Kerja</label>
           <select id="shift-select">
-            <option value="pagi">Pagi (Masuk 08:40 - Pulang 15:30)</option>
-            <option value="siang">Siang (Masuk 12:40 - Pulang 20:30)</option>
+            <option value="pagi">Pagi (Masuk 07:30 - Pulang 15:30)</option>
+            <option value="siang">Siang (Masuk 12:30 - Pulang 20:30)</option>
           </select>
         </div>
 
@@ -439,8 +439,8 @@
     if (!jamMasuk) return 0;
     
     // Tentukan batas waktu berdasarkan shift yang dipilih
-    let batasMasuk = "08:40:00"; 
-    if (shift === 'pagi') batasMasuk = "08:40:00";
+    let batasMasuk = "07:40:00"; 
+    if (shift === 'pagi') batasMasuk = "07:40:00";
     else if (shift === 'siang') batasMasuk = "12:40:00";
 
     // Jika melebihi batas jam masuk, dihitung 1 kali telat
@@ -462,7 +462,7 @@
           setGPSState('allowed', `Lokasi Sesuai (Jarak: ${Math.round(distance)}m)`);
         } else {
           userLocation.allowed = false; 
-          setGPSState('denied', `Di luar area. Jarak: ${Math.round(distance)}m (Batas: 100m)`);
+          setGPSState('denied', `Di luar area. Jarak: ${Math.round(distance)}m (Batas: 50m)`);
           nonaktifkanTombolAbsen();
         }
       },
